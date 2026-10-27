@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light"><head><meta charset="UTF-8"/><title>Dashboard ASAP</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#eef1f4;--bg2:#fff;--bg3:#f7f9fb;--bd:#dde3ea;--txt:#1f2937;--txt3:#6b7280;--blue:#2e75b6;--sh:0 1px 3px rgba(20,30,50,.08)}
+[data-theme=dark]{--bg:#0f172a;--bg2:#1e293b;--bg3:#243044;--bd:#334155;--txt:#e2e8f0;--txt3:#94a3b8;--blue:#3b82f6;--sh:0 1px 6px rgba(0,0,0,.4)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--txt);font-size:12px}
+.hd{background:linear-gradient(135deg,#1f2937,#2e75b6);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.hd h1{font-size:22px;font-weight:900}.badge{background:#c55a11;padding:2px 9px;border-radius:9px;font-size:11px;margin-left:8px}
+.tm{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 11px;border-radius:14px;cursor:pointer;font-weight:700;display:block;margin:0 0 4px auto}
+.imp{background:var(--bg2);padding:8px 20px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+label.dz{flex:1;min-width:220px;border:2px dashed var(--blue);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--bg3);color:var(--txt3)}
+label.dz2{border-color:#16a34a}input[type=file]{display:none}
+.sp{padding:5px 12px;border-radius:20px;font-weight:700;background:var(--bg3);color:var(--txt3)}.sp.ok{background:#dcf5e3;color:#15803d}
+.tabs{background:var(--bg2);display:flex;border-bottom:1px solid var(--bd);overflow-x:auto}
+.tab{padding:8px 20px;cursor:pointer;font-weight:700;color:var(--txt3);border-bottom:3px solid transparent;white-space:nowrap}
+.tab.on{color:var(--txt);border-bottom-color:var(--blue);background:var(--bg3)}
+.fbar{background:var(--bg2);padding:6px 20px;display:flex;gap:6px;align-items:center;border-bottom:1px solid var(--bd);flex-wrap:wrap}
+button{border:none;padding:4px 12px;border-radius:14px;cursor:pointer;font-size:11px;font-weight:700}
+.bon{background:var(--blue);color:#fff}.bof{background:var(--bg3);color:var(--txt3)}.bxl{background:#dcf5e3;color:#15803d}
+.dp,.srch{background:var(--bg2);border:1px solid var(--bd);color:var(--txt);border-radius:6px;padding:4px 8px;font-size:11px}
+.ab{background:#fef3d6;border-bottom:2px solid #f5c518;padding:6px 20px;font-size:11px;color:#7a4f00;display:none}
+.ab.on{display:block}.ab select{margin:0 8px 0 3px}
+.main{padding:10px 16px}.pg{display:none}.pg.on{display:block}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:7px;margin-bottom:10px}
+.kpi{background:var(--bg2);border-radius:7px;padding:9px 12px;border-left:3px solid var(--blue);box-shadow:var(--sh);position:relative}
+.kpi.q{border-left-color:#e74c3c}.kpi.d{border-left-color:#1abc9c}.kpi.s{border-left-color:#c55a11}
+.kl{font-size:9px;color:var(--txt3);text-transform:uppercase}.kv{font-size:19px;font-weight:800}.ks{font-size:9px;color:var(--txt3)}
+.kb{position:absolute;top:6px;right:7px;font-size:9px;padding:2px 6px;border-radius:7px;font-weight:700}
+.kok{background:#dcf5e3;color:#15803d}.kwn{background:#fef3d6;color:#a06600}.kbd{background:#fde2e2;color:#c0392b}
+.card{background:var(--bg2);border-radius:7px;padding:10px;border:1px solid var(--bd);box-shadow:var(--sh);margin-bottom:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ct{font-size:10px;font-weight:800;text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.cfg{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.cfg input,td input{width:72px;padding:3px;border:1px solid var(--bd);border-radius:5px;background:var(--bg2);color:var(--txt);text-align:center}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg3);color:var(--txt3);padding:7px;font-size:11px;position:sticky;top:0;cursor:pointer}
+td{padding:6px 7px;text-align:center;border-top:1px solid var(--bd)}td:first-child,th:first-child{text-align:left}
+.tw{max-height:430px;overflow:auto}.g{color:#16a34a;font-weight:700}.o{color:#d49000;font-weight:700}.r{color:#e74c3c;font-weight:700}
+@media print{.imp,.fbar,.tabs,.tm{display:none}}
+</style></head><body>
+<div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
+<div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
+<div class="imp">
+<label class="dz"><b>Prod M ASAP</b> (xlsx)<input type="file" id="fp" accept=".xlsx,.xls"></label>
+<label class="dz dz2"><b>RC ASAP – NQ + Objectif NQ</b> (xlsx)<input type="file" id="fr" accept=".xlsx,.xls"></label>
+<span class="sp" id="st">En attente des fichiers</span></div>
+<div class="tabs" id="tabs"></div>
+<div class="fbar"><span>Site :</span><span id="sites"></span><span style="margin-left:10px">Du</span><input type="date" class="dp" id="d1"><span>au</span><input type="date" class="dp" id="d2">
+<button class="bof" id="rz">Réinitialiser</button><input class="srch" id="sr" placeholder="Rechercher un agent…"><button class="bxl" id="xl" style="margin-left:auto">⬇ Export Excel</button><button class="bof" onclick="print()">🖨 Imprimer</button></div>
+<div class="ab" id="ab"></div>
+<div class="main">
+
+<div class="pg" id="p0"><div class="k" id="k0"></div>
+ <div class="g2"><div class="card"><div class="ct">Extraits traités par jour</div><canvas id="a1" height="140"></canvas></div>
+ <div class="card"><div class="ct">Comparaison des sites</div><div class="tw"><table><thead id="sh"></thead><tbody id="sb"></tbody></table></div></div></div></div>
+
+<div class="pg" id="p1"><div class="k" id="k1"></div>
+ <div class="g3"><div class="card"><div class="ct">Traités par site</div><canvas id="b1" height="170"></canvas></div>
+ <div class="card"><div class="ct">Motifs de refus</div><canvas id="b2" height="170"></canvas></div>
+ <div class="card"><div class="ct">Top agents (traités)</div><canvas id="b3" height="170"></canvas></div></div>
+ <div class="g3"><div class="card"><div class="ct">Validés / Refusés</div><canvas id="b4" height="170"></canvas></div>
+ <div class="card"><div class="ct">Part de production par site</div><canvas id="b5" height="170"></canvas></div>
+ <div class="card"><div class="ct">Agents : DMT vs cible</div><canvas id="b6" height="170"></canvas></div></div></div>
+
+<div class="pg" id="p2"><div class="k" id="k2"></div>
+ <div class="card"><div class="ct">Objectifs DMT (modulables, enregistrés dans le navigateur)</div><div class="cfg">Cible globale (min) <input id="oD" type="number" step="0.5"><small style="color:var(--txt3)">Cible par agent : colonne « Cible DMT » de l'onglet Agents (junior : valeur plus haute)</small></div></div>
+ <div class="g3"><div class="card"><div class="ct">DMT par jour (min)</div><canvas id="c1" height="170"></canvas></div>
+ <div class="card"><div class="ct">Répartition par tranche</div><canvas id="c2" height="170"></canvas></div>
+ <div class="card"><div class="ct">DMT validés vs refusés, par site</div><canvas id="c3" height="170"></canvas></div></div>
+ <div class="card"><div class="ct">DMT par agent vs cible</div><canvas id="c4" height="120"></canvas></div></div>
+
+<div class="pg" id="p3"><div class="k" id="k3"></div>
+ <div class="card"><div class="ct">Objectifs NQ (ratios)</div><div class="cfg">Mauvaise <input id="oM" type="number" step="0.0001"> Non-conforme <input id="oN" type="number" step="0.0001"> Loupé <input id="oL" type="number" step="0.00001">
+ <small style="color:var(--txt3)">Mauvaise et NC ÷ Validés · Loupé ÷ Refusés</small></div></div>
+ <div class="g3"><div class="card"><div class="ct">NQ par catégorie et site</div><canvas id="d1c" height="170"></canvas></div>
+ <div class="card"><div class="ct">Causes racines</div><canvas id="d2" height="170"></canvas></div>
+ <div class="card"><div class="ct">Taux par site vs objectif (%)</div><canvas id="d3" height="170"></canvas></div></div>
+ <div class="g3"><div class="card"><div class="ct">NQ par catégorie</div><canvas id="d4" height="170"></canvas></div>
+ <div class="card"><div class="ct">NQ par site</div><canvas id="d5" height="170"></canvas></div>
+ <div class="card"><div class="ct">Agents dans l'objectif NQ</div><canvas id="d6" height="170"></canvas></div></div>
+ <div class="card"><div class="ct">Détail des NQ</div><div class="tw"><table><thead id="nh"></thead><tbody id="nb"></tbody></table></div></div></div>
+
+<div class="pg" id="p4"><div class="card"><div class="ct">Détail par agent</div><div class="tw"><table><thead><tr id="th"></tr></thead><tbody id="tb"></tbody></table></div></div></div>
+
+<div class="pg" id="p5"><div class="card"><div class="ct">Classement des agents
+ <select class="dp" id="rk"><option value="glob">Rang global (moyenne des 5 critères)</option><option value="tr">Production (traités)</option><option value="dmt">DMT (le plus bas)</option><option value="rM">Taux Mauvaise (le plus bas)</option><option value="rN">Taux Non-conforme (le plus bas)</option><option value="rL">Taux Loupé (le plus bas)</option></select></div>
+ <div class="g2"><div class="tw"><table><thead><tr><th>#</th><th>Agent</th><th>Site</th><th>Valeur</th></tr></thead><tbody id="rb"></tbody></table></div>
+ <div><canvas id="e1" height="260"></canvas></div></div></div></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LS=(k,d)=>{try{return JSON.parse(localStorage.getItem('asap_'+k))??d}catch(e){return d}};
+const SV=(k,v)=>localStorage.setItem('asap_'+k,JSON.stringify(v));
+let P=[],R=[],CH={},sortK='tr',sortD=-1,tab=LS('tab',0),site='Tous',theme=LS('theme','light');
+let dmtG=LS('dmtG',15),dmtA=LS('dmtA',{}),map=LS('map',{}),OBJ=LS('obj',{Mauvaise:0.0018,'Non-conforme':0.0007,Loupé:0.00008});
+const TABS=['Vue d\'ensemble','Production','DMT','Qualité','Agents','Classement'];
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const key2=s=>norm(s).replace(/[^a-z]/g,'').split('').sort().join('');
+function lev(a,b){if(Math.abs(a.length-b.length)>3)return 99;const d=[];for(let i=0;i<=a.length;i++)d[i]=[i];for(let j=1;j<=b.length;j++)d[0][j]=j;
+for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]==b[j-1]?0:1));return d[a.length][b.length]}
+const toD=v=>{if(!v)return null;if(v instanceof Date)return v;const d=new Date(String(v).replace(' ','T'));return isNaN(d)?null:d};
+const fk=(o,re)=>Object.keys(o).find(k=>re.test(k));
+const iso=d=>d.toISOString().slice(0,10);
+const pc=v=>v==null?'–':(v*100).toFixed(3)+' %';
+const f1=v=>v==null||isNaN(v)?'–':v.toFixed(1);
+function rd(f,cb){const r=new FileReader();r.onload=e=>cb(XLSX.read(e.target.result,{type:'array',cellDates:true}));r.readAsArrayBuffer(f)}
+$('fp').onchange=e=>rd(e.target.files[0],wb=>{P=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:true});st();render()});
+$('fr').onchange=e=>rd(e.target.files[0],wb=>{
+ const s=wb.SheetNames.find(n=>/nq/i.test(n)&&!/obj/i.test(n))||wb.SheetNames[0];
+ R=XLSX.utils.sheet_to_json(wb.Sheets[s],{defval:''});
+ const so=wb.SheetNames.find(n=>/obj/i.test(n));
+ if(so){const o=XLSX.utils.sheet_to_json(wb.Sheets[so],{defval:''})[0];if(o){const g=re=>{const k=fk(o,re);return k?parseFloat(o[k]):null};
+  OBJ={Mauvaise:g(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':g(/non/i)??OBJ['Non-conforme'],Loupé:g(/^lou/i)??OBJ.Loupé};SV('obj',OBJ)}}
+ st();render()});
+function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`}
+function applyTheme(){document.documentElement.dataset.theme=theme;$('tm').textContent=theme=='dark'?'☀ Mode clair':'🌙 Mode sombre';
+ Chart.defaults.color=theme=='dark'?'#cbd5e1':'#6b7280';Chart.defaults.borderColor=theme=='dark'?'#2d3f55':'#eef1f4'}
+$('tm').onclick=()=>{theme=theme=='dark'?'light':'dark';SV('theme',theme);render()};
+['oD','oM','oN','oL'].forEach(id=>$(id).onchange=()=>{dmtG=+$('oD').value||dmtG;OBJ.Mauvaise=+$('oM').value;OBJ['Non-conforme']=+$('oN').value;OBJ.Loupé=+$('oL').value;SV('dmtG',dmtG);SV('obj',OBJ);render()});
+['d1','d2','sr'].forEach(id=>$(id).oninput=render);
+$('rk').onchange=render;
+$('rz').onclick=()=>{$('d1').value=$('d2').value=$('sr').value='';site='Tous';render()};
+
+function build(){
+ const A={},days={},motifs={},bins=[0,0,0],S={};
+ const kE=P[0]&&fk(P[0],/^etat/i),kS=P[0]&&fk(P[0],/site/i),kM=P[0]&&fk(P[0],/motif/i),kD=P[0]&&fk(P[0],/dmt/i);
+ const d1=$('d1').value,d2=$('d2').value;
+ const gs=n=>S[n]||(S[n]={n,tr:0,va:0,re:0,dS:0,dN:0,vS:0,vN:0,rS:0,rN:0,M:0,NC:0,L:0});
+ const ga=(n,s)=>A[n]||(A[n]={n,site:s||'–',tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
+ P.forEach(r=>{const who=r['Traité par']||'';if(!who||/^ai /i.test(who))return;
+  const s=(kS&&r[kS])||'–';if(site!=='Tous'&&s!==site)return;
+  const t=toD(r['DH traitement']);if(t){const dk=iso(t);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
+  const a=ga(who,s),sg=gs(s);a.tr++;sg.tr++;const e=kE?r[kE]:'';
+  const ref=e==='Refusé';if(e==='Validé'){a.va++;sg.va++}else if(ref){a.re++;sg.re++;const m=(kM&&r[kM])||'Non renseigné';motifs[m]=(motifs[m]||0)+1}
+  let m=null;if(kD&&r[kD]!==''&&!isNaN(parseFloat(r[kD])))m=parseFloat(r[kD]);else{const x=toD(r['DH MAD extrait']);if(t&&x)m=(t-x)/60000}
+  const dk=t?iso(t):'?';(days[dk]=days[dk]||{tr:0,va:0,re:0,dS:0,dN:0});days[dk].tr++;ref?days[dk].re++:days[dk].va++;
+  if(m!==null&&m>=0){a.dS+=m;a.dN++;sg.dS+=m;sg.dN++;days[dk].dS+=m;days[dk].dN++;bins[m<5?0:m<=15?1:2]++;if(ref){sg.rS+=m;sg.rN++}else{sg.vS+=m;sg.vN++}}});
+ const keys=Object.keys(A).map(n=>({n,k:key2(n)}));const un=[],cs={},causes={},nq=[];
+ const kc=R[0]&&fk(R[0],/collaborateur/i),kg=R[0]&&fk(R[0],/cat/i),ki=R[0]&&fk(R[0],/imputable/i),kcr=R[0]&&fk(R[0],/cause/i),kdt=R[0]&&fk(R[0],/indexation/i);
+ R.forEach(r=>{if(!kc||!r[kc])return;if(ki&&String(r[ki]).trim().toUpperCase()!=='O')return;
+  const dt=kdt&&toD(r[kdt]);if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
+  const nm=r[kc];let t=map[nm];if(!t){const k=key2(nm);let b=null,bd=99;keys.forEach(x=>{const d=lev(k,x.k);if(d<bd){bd=d;b=x.n}});if(bd<=2)t=b}
+  const c=r[kg],cn=/mauv/i.test(c)?'Mauvaise':/non/i.test(c)?'Non-conforme':/lou/i.test(c)?'Loupé':null;if(!cn)return;
+  let a=t&&A[t];if(!a){if(site!=='Tous'&&Object.keys(A).length)return;if(!un.includes(nm))un.push(nm);a=ga(nm+' *')}
+  const key=cn=='Mauvaise'?'M':cn=='Non-conforme'?'NC':'L';a[key]++;gs(a.site)[key]++;
+  cs[a.site]=cs[a.site]||{Mauvaise:0,'Non-conforme':0,Loupé:0};cs[a.site][cn]++;
+  const cr=(kcr&&r[kcr])||'Non renseignée';causes[cr]=(causes[cr]||0)+1;nq.push({Agent:a.n,Site:a.site,Catégorie:cn,Cause:cr,Date:dt?iso(dt):''})});
+ const q=$('sr').value.toLowerCase();
+ let ag=Object.values(A).filter(a=>a.n.toLowerCase().includes(q));
+ const ks=P[0]&&fk(P[0],/site/i);
+ return {ag,days,motifs,bins,S:Object.values(S),un,cs,causes,nq,keys:Object.keys(A).filter(n=>!n.endsWith('*')),sites:[...new Set(P.map(r=>(ks&&r[ks])||'').filter(Boolean))]};
+}
+const tot=L=>L.reduce((s,a)=>({tr:s.tr+a.tr,va:s.va+a.va,re:s.re+a.re,dS:s.dS+a.dS,dN:s.dN+a.dN,M:s.M+a.M,NC:s.NC+a.NC,L:s.L+a.L}),{tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
+const rates=a=>({dmt:a.dN?a.dS/a.dN:null,rM:a.va?a.M/a.va:null,rN:a.va?a.NC/a.va:null,rL:a.re?a.L/a.re:null});
+const cl=(v,o)=>v==null?'':v<=o?'g':v<=o*1.5?'o':'r';
+const bd=(v,o)=>v==null?'':`<span class="kb ${v<=o?'kok':v<=o*1.5?'kwn':'kbd'}">${v<=o?'OK':v<=o*1.5?'Alerte':'Critique'}</span>`;
+const K=(l,v,s,c,b)=>`<div class="kpi ${c||''}">${b||''}<div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||''}</div></div>`;
+const mk=(id,cfg)=>{if(CH[id])CH[id].destroy();cfg.options=Object.assign({responsive:true},cfg.options||{});CH[id]=new Chart($(id),cfg)};
+const COL=['#2e75b6','#c55a11','#2ecc71','#9b59b6','#e74c3c','#1abc9c','#d4a017','#7f8c8d'];
+let LAST;
+
+function render(){
+ applyTheme();
+ $('tabs').innerHTML=TABS.map((t,i)=>`<div class="tab ${i==tab?'on':''}" data-i="${i}">${t}</div>`).join('');
+ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{tab=+t.dataset.i;SV('tab',tab);render()});
+ for(let i=0;i<6;i++)$('p'+i).classList.toggle('on',i==tab);
+ $('oD').value=dmtG;$('oM').value=OBJ.Mauvaise;$('oN').value=OBJ['Non-conforme'];$('oL').value=OBJ.Loupé;
+ const D=LAST=build(),T=tot(D.ag),r=rates(T);
+ $('sites').innerHTML=['Tous',...D.sites].map(s=>`<button class="${s==site?'bon':'bof'}" data-s="${s}">${s}</button>`).join(' ');
+ document.querySelectorAll('#sites button').forEach(b=>b.onclick=()=>{site=b.dataset.s;render()});
+ const dk=Object.keys(D.days).filter(d=>d!='?').sort();
+ if(dk.length){$('per').textContent=new Date(dk[0]).toLocaleDateString('fr-FR')+' → '+new Date(dk[dk.length-1]).toLocaleDateString('fr-FR')}
+ const ab=$('ab');ab.classList.toggle('on',D.un.length>0);
+ ab.innerHTML='<b>Noms NQ non rapprochés :</b> '+D.un.map(u=>`${u} → <select data-u="${u.replace(/"/g,'&quot;')}"><option value="">—</option>${D.keys.map(k=>`<option>${k}</option>`).join('')}</select>`).join('');
+ ab.querySelectorAll('select').forEach(s=>s.onchange=()=>{if(s.value){map[s.dataset.u]=s.value;SV('map',map);render()}});
+ // KPI
+ const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.rM,OBJ.Mauvaise))+K('Non-conforme',pc(r.rN),`${T.NC} NQ · obj ${pc(OBJ['Non-conforme'])}`,'q',bd(r.rN,OBJ['Non-conforme']))+K('Loupé',pc(r.rL),`${T.L} NQ · obj ${pc(OBJ.Loupé)}`,'q',bd(r.rL,OBJ.Loupé));
+ const kd=K('DMT moyen',r.dmt==null?'–':f1(r.dmt)+' min','cible '+dmtG+' min','d',bd(r.dmt,dmtG));
+ const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
+ $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
+ const vS=D.S.reduce((s,x)=>s+x.vS,0),vN=D.S.reduce((s,x)=>s+x.vN,0),rS=D.S.reduce((s,x)=>s+x.rS,0),rN=D.S.reduce((s,x)=>s+x.rN,0);
+ $('k2').innerHTML=kd+K('DMT validés',vN?f1(vS/vN)+' min':'–','','d')+K('DMT refusés',rN?f1(rS/rN)+' min':'–','','d');
+ $('k3').innerHTML=kq;
+ // sites
+ $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
+ $('sb').innerHTML=D.S.map(s=>{const x=rates(s);return `<tr><td>${s.n}</td><td>${s.tr}</td><td>${s.tr?(s.re/s.tr*100).toFixed(1):'–'}</td><td class="${cl(x.dmt,dmtG)}">${f1(x.dmt)}</td><td class="${cl(x.rM,OBJ.Mauvaise)}">${pc(x.rM)}</td><td class="${cl(x.rN,OBJ['Non-conforme'])}">${pc(x.rN)}</td><td class="${cl(x.rL,OBJ.Loupé)}">${pc(x.rL)}</td></tr>`}).join('');
+ // agents
+ const cols=[['n','Agent'],['site','Site'],['tr','Traités'],['va','Validés'],['re','Refusés'],['dmt','DMT'],['obj','Cible DMT'],['M','Mauvaise'],['rM','Taux M'],['NC','NC'],['rN','Taux NC'],['L','Loupé'],['rL','Taux L']];
+ $('th').innerHTML=cols.map(c=>`<th data-k="${c[0]}">${c[1]}${c[0]==sortK?(sortD>0?' ▲':' ▼'):''}</th>`).join('');
+ document.querySelectorAll('#th th').forEach(t=>t.onclick=()=>{sortD=sortK==t.dataset.k?-sortD:-1;sortK=t.dataset.k;render()});
+ const rows=D.ag.map(a=>({...a,...rates(a),obj:dmtA[a.n]??dmtG}));
+ const srt=[...rows].sort((x,y)=>{const a=x[sortK]??-1,b=y[sortK]??-1;return typeof a=='string'?a.localeCompare(b)*-sortD:(a-b)*sortD});
+ $('tb').innerHTML=srt.map(a=>`<tr><td>${a.n}</td><td>${a.site}</td><td>${a.tr}</td><td>${a.va}</td><td>${a.re}</td><td class="${a.dmt==null?'':a.dmt<=a.obj?'g':a.dmt<=a.obj*1.3?'o':'r'}">${f1(a.dmt)}</td>
+ <td><input type="number" step="0.5" value="${a.obj}" data-a="${a.n.replace(/"/g,'&quot;')}"></td>
+ <td>${a.M}</td><td class="${cl(a.rM,OBJ.Mauvaise)}">${pc(a.rM)}</td><td>${a.NC}</td><td class="${cl(a.rN,OBJ['Non-conforme'])}">${pc(a.rN)}</td><td>${a.L}</td><td class="${cl(a.rL,OBJ.Loupé)}">${pc(a.rL)}</td></tr>`).join('');
+ document.querySelectorAll('td input').forEach(i=>i.onchange=()=>{dmtA[i.dataset.a]=+i.value;SV('dmtA',dmtA);render()});
+ $('nh').innerHTML='<tr><th>Date</th><th>Agent</th><th>Site</th><th>Catégorie</th><th>Cause</th></tr>';
+ $('nb').innerHTML=D.nq.map(n=>`<tr><td>${n.Date}</td><td>${n.Agent}</td><td>${n.Site}</td><td>${n.Catégorie}</td><td>${n.Cause}</td></tr>`).join('');
+ // classement
+ {const k=$('rk').value,base=rows.filter(a=>a.tr>0);
+  if(k=='glob'){base.forEach(a=>a._g=0);
+   ['tr','dmt','rM','rN','rL'].forEach(c=>{const L=base.filter(a=>a[c]!=null).sort((x,y)=>c=='tr'?y.tr-x.tr:x[c]-y[c]);
+    L.forEach((a,i)=>a._g+=i+1);base.forEach(a=>{if(a[c]==null)a._g+=L.length+1})})}
+  const L=base.filter(a=>k=='glob'||a[k]!=null).sort((x,y)=>k=='glob'?x._g-y._g:k=='tr'?y.tr-x.tr:x[k]-y[k]);
+  const val=a=>k=='glob'?a._g/5:k=='tr'?a.tr:k=='dmt'?a.dmt:a[k]*100;
+  const fmt=a=>k=='glob'?'rang moy. '+(a._g/5).toFixed(1):k=='tr'?a.tr:k=='dmt'?f1(a.dmt)+' min':pc(a[k]);
+  $('rb').innerHTML=L.map((a,i)=>`<tr><td>${['🥇','🥈','🥉'][i]||i+1}</td><td>${a.n}</td><td>${a.site}</td><td>${fmt(a)}</td></tr>`).join('');
+  if(tab==5){const t=L.slice(0,15);mk('e1',{type:'bar',data:{labels:t.map(a=>a.n),datasets:[{label:'Valeur',data:t.map(val),backgroundColor:t.map((a,i)=>i<3?'#d4a017':'#2e75b6')}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}})}}
+ // graphiques
+ const sn=D.S.map(s=>s.n);
+ if(tab==0)mk('a1',{type:'bar',data:{labels:dk,datasets:[{label:'Validés',data:dk.map(d=>D.days[d].va),backgroundColor:'#2ecc71'},{label:'Refusés',data:dk.map(d=>D.days[d].re),backgroundColor:'#e74c3c'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
+ if(tab==1){
+  mk('b1',{type:'bar',data:{labels:sn,datasets:[{label:'Validés',data:D.S.map(s=>s.va),backgroundColor:'#2ecc71'},{label:'Refusés',data:D.S.map(s=>s.re),backgroundColor:'#e74c3c'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
+  mk('b2',{type:'doughnut',data:{labels:Object.keys(D.motifs),datasets:[{data:Object.values(D.motifs),backgroundColor:COL}]}});
+  const tp=[...D.ag].sort((a,b)=>b.tr-a.tr).slice(0,15);mk('b3',{type:'bar',data:{labels:tp.map(a=>a.n),datasets:[{label:'Traités',data:tp.map(a=>a.tr),backgroundColor:'#2e75b6'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+  mk('b4',{type:'doughnut',data:{labels:['Validés','Refusés'],datasets:[{data:[T.va,T.re],backgroundColor:['#2ecc71','#e74c3c']}]}});
+  mk('b5',{type:'doughnut',data:{labels:sn,datasets:[{data:D.S.map(s=>s.tr),backgroundColor:COL}]}});
+  const w=rows.filter(a=>a.dmt!=null),ok=w.filter(a=>a.dmt<=a.obj).length,mid=w.filter(a=>a.dmt>a.obj&&a.dmt<=a.obj*1.3).length;
+  mk('b6',{type:'doughnut',data:{labels:['Dans la cible','Proche (≤ +30 %)','Hors cible'],datasets:[{data:[ok,mid,w.length-ok-mid],backgroundColor:['#2ecc71','#f39c12','#e74c3c']}]}});
+ }
+ if(tab==2){
+  mk('c1',{type:'line',data:{labels:dk,datasets:[{label:'DMT',data:dk.map(d=>D.days[d].dN?D.days[d].dS/D.days[d].dN:null),borderColor:'#2e75b6',tension:.3},{label:'Cible',data:dk.map(()=>dmtG),borderColor:'#c55a11',borderDash:[5,5],pointRadius:0}]}});
+  mk('c2',{type:'doughnut',data:{labels:['< 5 min','5–15 min','> 15 min'],datasets:[{data:D.bins,backgroundColor:['#2ecc71','#f39c12','#e74c3c']}]}});
+  mk('c3',{type:'bar',data:{labels:sn,datasets:[{label:'Validés',data:D.S.map(s=>s.vN?s.vS/s.vN:null),backgroundColor:'#2ecc71'},{label:'Refusés',data:D.S.map(s=>s.rN?s.rS/s.rN:null),backgroundColor:'#e74c3c'}]}});
+  const ra=rows.filter(x=>x.dmt!=null).sort((a,b)=>b.dmt-a.dmt).slice(0,25);
+  mk('c4',{type:'bar',data:{labels:ra.map(x=>x.n),datasets:[{label:'DMT',data:ra.map(x=>x.dmt),backgroundColor:ra.map(x=>x.dmt<=x.obj?'#2ecc71':'#e74c3c')},{type:'line',label:'Cible',data:ra.map(x=>x.obj),borderColor:'#c55a11',pointRadius:2}]}});
+ }
+ if(tab==3){
+  const cats=['Mauvaise','Non-conforme','Loupé'],ss=Object.keys(D.cs);
+  mk('d1c',{type:'bar',data:{labels:cats,datasets:ss.map((s,i)=>({label:s,data:cats.map(c=>D.cs[s][c]),backgroundColor:COL[i%8]}))}});
+  mk('d2',{type:'bar',data:{labels:Object.keys(D.causes),datasets:[{label:'NQ',data:Object.values(D.causes),backgroundColor:'#2e75b6'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+  mk('d3',{type:'bar',data:{labels:sn,datasets:[{label:'Mauvaise',data:D.S.map(s=>rates(s).rM*100),backgroundColor:'#e74c3c'},{label:'NC',data:D.S.map(s=>rates(s).rN*100),backgroundColor:'#f39c12'},{label:'Loupé',data:D.S.map(s=>rates(s).rL*100),backgroundColor:'#9b59b6'}]}});
+  mk('d4',{type:'doughnut',data:{labels:cats,datasets:[{data:[T.M,T.NC,T.L],backgroundColor:['#e74c3c','#f39c12','#9b59b6']}]}});
+  mk('d5',{type:'doughnut',data:{labels:sn,datasets:[{data:D.S.map(s=>s.M+s.NC+s.L),backgroundColor:COL}]}});
+  const w=rows.filter(a=>a.tr>0),good=w.filter(a=>(a.rM==null||a.rM<=OBJ.Mauvaise)&&(a.rN==null||a.rN<=OBJ['Non-conforme'])&&(a.rL==null||a.rL<=OBJ.Loupé)).length;
+  mk('d6',{type:'doughnut',data:{labels:['Dans l\'objectif (3 indicateurs)','Hors objectif'],datasets:[{data:[good,w.length-good],backgroundColor:['#2ecc71','#e74c3c']}]}});
+ }
+}
+// export Excel
+$('xl').onclick=()=>{if(!LAST)return;const D=LAST;
+ const ag=D.ag.map(a=>{const x=rates(a);return {Agent:a.n,Site:a.site,Traités:a.tr,Validés:a.va,Refusés:a.re,'DMT (min)':x.dmt==null?'':+x.dmt.toFixed(2),'Cible DMT':dmtA[a.n]??dmtG,Mauvaise:a.M,'Taux Mauvaise':x.rM??'','Non-conforme':a.NC,'Taux NC':x.rN??'',Loupé:a.L,'Taux Loupé':x.rL??''}});
+ const si=D.S.map(s=>{const x=rates(s);return {Site:s.n,Traités:s.tr,Validés:s.va,Refusés:s.re,'DMT (min)':x.dmt==null?'':+x.dmt.toFixed(2),'Taux Mauvaise':x.rM??'','Taux NC':x.rN??'','Taux Loupé':x.rL??''}});
+ const wb=XLSX.utils.book_new();
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ag),'Agents');
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(si),'Sites');
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.nq),'NQ');
+ XLSX.writeFile(wb,'Dashboard_ASAP_'+new Date().toISOString().slice(0,10)+'.xlsx')};
+render();
+</script></body></html>
