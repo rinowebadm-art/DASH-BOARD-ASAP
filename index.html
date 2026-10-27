@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr" data-theme="light"><head><meta charset="UTF-8"/><title>Dashboard ASAP</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -36,8 +37,34 @@ button{border:none;padding:4px 12px;border-radius:14px;cursor:pointer;font-size:
 table{width:100%;border-collapse:collapse}
 th{background:var(--bg3);color:var(--txt3);padding:7px;font-size:11px;position:sticky;top:0;cursor:pointer}
 td{padding:6px 7px;text-align:center;border-top:1px solid var(--bd)}td:first-child,th:first-child{text-align:left}
-.tw{max-height:430px;overflow:auto}.g,.o,.r{font-weight:700}td.g{background:rgba(22,163,74,.16);color:#15803d}td.o{background:rgba(245,158,11,.20);color:#b45309}td.r{background:rgba(220,38,38,.16);color:#b91c1c}[data-theme=dark] td.g{background:rgba(74,222,128,.15);color:#4ade80}[data-theme=dark] td.o{background:rgba(251,191,36,.15);color:#fbbf24}[data-theme=dark] td.r{background:rgba(248,113,113,.18);color:#f87171}[data-theme=dark] .kok{background:#14532d;color:#86efac}[data-theme=dark] .kwn{background:#78350f;color:#fcd34d}[data-theme=dark] .kbd{background:#7f1d1d;color:#fca5a5}tbody tr:hover td{filter:brightness(.96)}
+.tw{max-height:430px;overflow:auto}
+.g,.o,.r{font-weight:700}
+td.g{background:rgba(22,163,74,.16);color:#15803d}
+td.o{background:rgba(245,158,11,.20);color:#b45309}
+td.r{background:rgba(220,38,38,.16);color:#b91c1c}[data-theme=dark] 
+td.g{background:rgba(74,222,128,.15);color:#4ade80}
+[data-theme=dark] td.o{background:rgba(251,191,36,.15);color:#fbbf24}
+[data-theme=dark] td.r{background:rgba(248,113,113,.18);color:#f87171}
+[data-theme=dark] .kok{background:#14532d;color:#86efac}
+[data-theme=dark] .kwn{background:#78350f;color:#fcd34d}
+[data-theme=dark] .kbd{background:#7f1d1d;color:#fca5a5}
+tbody tr:hover td{filter:brightness(.96)}
 @media print{.imp,.fbar,.tabs,.tm{display:none}}
+/* ===== Nouvelle palette + police ===== */
+:root{--bg:#eef0f7;--bg2:#fff;--bg3:#f5f6fb;--bd:#e4e7f2;--txt:#3b4268;--txt3:#7b83a6;--blue:#4f6df5;--sh:0 4px 16px rgba(80,90,140,.10)}
+[data-theme=dark]{--bg:#12162b;--bg2:#1b2038;--bg3:#232948;--bd:#2f3659;--txt:#e6e9f7;--txt3:#9aa3c7;--blue:#6d86ff;--sh:0 4px 16px rgba(0,0,0,.35)}
+body,button,input,select,table,th,td{font-family:'Inter','Segoe UI',Arial,sans-serif}
+body{background:linear-gradient(180deg,var(--bg),var(--bg3))}
+.hd{background:linear-gradient(135deg,#2b3358,#4f6df5 70%,#f58a3c 140%)}
+.card,.kpi{border-radius:14px;border:1px solid var(--bd)}
+.kpi{border-left-width:4px}.tab.on{border-bottom-color:#f58a3c}
+.bon{background:linear-gradient(135deg,#f58a3c,#f2652e);color:#fff}
+.badge{background:#f58a3c}th{background:var(--bg3)}
+/* Noms d'agents lisibles en mode sombre */
+[data-theme=dark] tbody td:not(.g):not(.o):not(.r){color:var(--txt)!important}
+[data-theme=dark] td input{color:var(--txt)}
+[data-theme=dark] .ab{background:#3a2f12;color:#fcd34d;border-bottom-color:#a16207}
+[data-theme=dark] .ab select{background:var(--bg2);color:var(--txt)}
 </style></head><body>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
