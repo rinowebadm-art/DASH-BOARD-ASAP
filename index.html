@@ -145,8 +145,9 @@ const iso=d=>d.toISOString().slice(0,10);
 const pc=v=>v==null?'–':(v*100).toFixed(3)+' %';
 const f1=v=>v==null||isNaN(v)?'–':v.toFixed(1);
 const hms=m=>{if(m==null||isNaN(m))return '–';const s=Math.round(m*60);return Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+const tm=s=>{if(s==null||s==='')return null;const p=String(s).trim().split(':').map(Number);if(p.some(isNaN))return null;while(p.length<3)p.unshift(0);return p[0]*60+p[1]+p[2]/60};
 function rd(f,cb){const r=new FileReader();r.onload=e=>cb(XLSX.read(e.target.result,{type:'array',cellDates:true}));r.readAsArrayBuffer(f)}
-$('fp').onchange=e=>rd(e.target.files[0],wb=>{P=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:true});st();render()});
+$('fp').onchange=e=>rd(e.target.files[0],wb=>{const ws=wb.Sheets[wb.SheetNames[0]];P=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});const F=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});const h=Object.keys(P[0]||{}),kr=h.find(k=>/dmt.*rm/i.test(k)),kf=h.find(k=>/dmt.*ref/i.test(k));P.forEach((r,i)=>{r.__rm=kr?tm(F[i][kr]):null;r.__rf=kf?tm(F[i][kf]):null});st();render()});
 $('fr').onchange=e=>rd(e.target.files[0],wb=>{
  const s=wb.SheetNames.find(n=>/nq/i.test(n)&&!/obj/i.test(n))||wb.SheetNames[0];
  R=XLSX.utils.sheet_to_json(wb.Sheets[s],{defval:''});
@@ -174,7 +175,7 @@ function build(){
   const t=toD(r['DH traitement']);if(t){const dk=iso(t);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
   const a=ga(who,s),sg=gs(s);a.tr++;sg.tr++;const e=kE?r[kE]:'';
   const ref=e==='Refusé';if(e==='Validé'){a.va++;sg.va++}else if(ref){a.re++;sg.re++;const m=(kM&&r[kM])||'Non renseigné';motifs[m]=(motifs[m]||0)+1}
-  let m=null;if(kD&&r[kD]!==''&&!isNaN(parseFloat(r[kD])))m=parseFloat(r[kD]);else{const x=toD(r['DH MAD extrait']);if(t&&x)m=(t-x)/60000}
+  let m=ref?r.__rf:r.__rm;if(m==null)m=ref?r.__rm:r.__rf;
   const dk=t?iso(t):'?';(days[dk]=days[dk]||{tr:0,va:0,re:0,dS:0,dN:0});days[dk].tr++;ref?days[dk].re++:days[dk].va++;
   if(m!==null&&m>=0){a.dS+=m;a.dN++;sg.dS+=m;sg.dN++;days[dk].dS+=m;days[dk].dN++;bins[m<5?0:m<=15?1:2]++;if(ref){sg.rS+=m;sg.rN++}else{sg.vS+=m;sg.vN++}}});
  const keys=Object.keys(A).map(n=>({n,k:key2(n)}));const un=[],cs={},causes={},nq=[];
@@ -223,7 +224,7 @@ function render(){
  const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
  $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
  const vS=D.S.reduce((s,x)=>s+x.vS,0),vN=D.S.reduce((s,x)=>s+x.vN,0),rS=D.S.reduce((s,x)=>s+x.rS,0),rN=D.S.reduce((s,x)=>s+x.rN,0);
-$('k2').innerHTML=kd+K('DMT validés',vN?hms(vS/vN):'–','','d')+K('DMT refusés',rN?hms(rS/rN):'–','','d');
+$('k2').innerHTML=kd+K('DMT RM moyen',vN?hms(vS/vN):'–','','d')+K('DMT Refus moyen',rN?hms(rS/rN):'–','','d');
  $('k3').innerHTML=kq;
  // sites
  $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
