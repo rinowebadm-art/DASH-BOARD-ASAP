@@ -3,13 +3,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+Chart.register({id:'pal',beforeUpdate(c){
+const M={'#2ecc71':'#3fc7ab','#e74c3c':'#ee7770','#d4a017':'#f7cd3d','#2e75b6':'#4a89c4','#c55a11':'#cf7433','#16a34a':'#3fc7ab','#c0392b':'#ee7770','#a06600':'#f7cd3d','#15803d':'#3fc7ab'};
+const f=v=>typeof v==='string'?(M[v.toLowerCase()]||v):Array.isArray(v)?v.map(f):v;c.data.datasets.forEach(d=>{d.backgroundColor=f(d.backgroundColor);d.borderColor=f(d.borderColor)});}});
+Chart.defaults.font.family="'Inter','Segoe UI',sans-serif";
+Chart.defaults.borderRadius=4;
+</script>
 <style>
 :root{--bg:#eef1f4;--bg2:#fff;--bg3:#f7f9fb;--bd:#dde3ea;--txt:#1f2937;--txt3:#6b7280;--blue:#2e75b6;--sh:0 1px 3px rgba(20,30,50,.08)}
 [data-theme=dark]{--bg:#0f172a;--bg2:#1e293b;--bg3:#243044;--bd:#334155;--txt:#e2e8f0;--txt3:#94a3b8;--blue:#3b82f6;--sh:0 1px 6px rgba(0,0,0,.4)}
 *{box-sizing:border-box;margin:0;padding:0}
 .hd{background:linear-gradient(135deg,#1f2937,#2e75b6);color:#fff;padding:26px 28px;min-height:96px;display:flex;justify-content:space-between;align-items:center}
- .hd h1{font-size:28px;font-weight:900;letter-spacing:.5px}.badge{background:#c55a11;padding:3px 11px;border-radius:9px;font-size:12px;margin-left:10px;vertical-align:middle}
- .tm{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 11px;border-radius:14px;cursor:pointer;font-weight:700;display:block;margin:0 0 4px auto}
+.hd h1{font-size:28px;font-weight:900;letter-spacing:.5px}.badge{background:#c55a11;padding:3px 11px;border-radius:9px;font-size:12px;margin-left:10px;vertical-align:middle}
+.tm{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:4px 11px;border-radius:14px;cursor:pointer;font-weight:700;display:block;margin:0 0 4px auto}
 .imp{background:var(--bg2);padding:8px 20px;display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bd);flex-wrap:wrap}
 label.dz{flex:1;min-width:220px;border:2px dashed var(--blue);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:var(--bg3);color:var(--txt3)}
 label.dz2{border-color:#16a34a}input[type=file]{display:none}
@@ -65,6 +72,11 @@ body{background:linear-gradient(180deg,var(--bg),var(--bg3))}
 [data-theme=dark] td input{color:var(--txt)}
 [data-theme=dark] .ab{background:#3a2f12;color:#fcd34d;border-bottom-color:#a16207}
 [data-theme=dark] .ab select{background:var(--bg2);color:var(--txt)}
+:root{--blue:#4a89c4}.kpi.q{border-left-color:#ee7770}
+.kpi.d{border-left-color:#3fc7ab}.kpi.s{border-left-color:#cf7433}
+.bon{background:#4a89c4}.tab.on{border-bottom-color:#cf7433}
+.hd{background:linear-gradient(135deg,#2b3358,#4a89c4)}
+.badge{background:#cf7433}
 </style></head><body>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
