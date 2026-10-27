@@ -220,14 +220,14 @@ function render(){
  ab.querySelectorAll('select').forEach(s=>s.onchange=()=>{if(s.value){map[s.dataset.u]=s.value;SV('map',map);render()}});
  // KPI
  const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.rM,OBJ.Mauvaise))+K('Non-conforme',pc(r.rN),`${T.NC} NQ · obj ${pc(OBJ['Non-conforme'])}`,'q',bd(r.rN,OBJ['Non-conforme']))+K('Loupé',pc(r.rL),`${T.L} NQ · obj ${pc(OBJ.Loupé)}`,'q',bd(r.rL,OBJ.Loupé));
- const kd=K('DMT moyen',r.dmt==null?'–':hms(r.dmt),'cible '+hms(dmtG),'d',bd(r.dmt,dmtG));
+ const kd=K('DMT RM',DM.rm==null?'–':hms(DM.rm),'Validés · cible '+hms(dmtG),'d',bd(DM.rm,dmtG))+K('DMT Refus',DM.rf==null?'–':hms(DM.rf),'Refusés · cible '+hms(dmtG),'d',bd(DM.rf,dmtG));
  const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
 $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
 $('k2').innerHTML=K('DMT RM moyen',DM.rm==null?'–':hms(DM.rm),'','d')+K('DMT Refus moyen',DM.rf==null?'–':hms(DM.rf),'','d');
 $('k3').innerHTML=kq;
  // sites
- $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
- $('sb').innerHTML=D.S.map(s=>{const x=rates(s);return `<tr><td>${s.n}</td><td>${s.tr}</td><td>${s.tr?(s.re/s.tr*100).toFixed(1):'–'}</td><td class="${cl(x.dmt,dmtG)}">${hms(x.dmt)}</td><td class="${cl(x.rM,OBJ.Mauvaise)}">${pc(x.rM)}</td><td class="${cl(x.rN,OBJ['Non-conforme'])}">${pc(x.rN)}</td><td class="${cl(x.rL,OBJ.Loupé)}">${pc(x.rL)}</td></tr>`}).join('');
+ $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT RM</th><th>DMT Refus</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
+ $('sb').innerHTML=D.S.map(s=>{const x=rates(s);return `<tr><td>${s.n}</td><td>${s.tr}</td><td>${s.tr?(s.re/s.tr*100).toFixed(1):'–'}</td><td class="${cl(s.vN?s.vS/s.vN:null,dmtG)}">${hms(s.vN?s.vS/s.vN:null)}</td><td class="${cl(s.rN?s.rS/s.rN:null,dmtG)}">${hms(s.rN?s.rS/s.rN:null)}</td><td class="${cl(x.rM,OBJ.Mauvaise)}">${pc(x.rM)}</td><td class="${cl(x.rN,OBJ['Non-conforme'])}">${pc(x.rN)}</td><td class="${cl(x.rL,OBJ.Loupé)}">${pc(x.rL)}</td></tr>`}).join('');
  // agents
  const cols=[['n','Agent'],['site','Site'],['tr','Traités'],['va','Validés'],['re','Refusés'],['dRm','DMT RM'],['dRf','DMT Refus'],['obj','Cible DMT'],['M','Mauvaise'],['rM','Taux M'],['NC','NC'],['rN','Taux NC'],['L','Loupé'],['rL','Taux L']];
  $('th').innerHTML=cols.map(c=>`<th data-k="${c[0]}">${c[1]}${c[0]==sortK?(sortD>0?' ▲':' ▼'):''}</th>`).join('');
