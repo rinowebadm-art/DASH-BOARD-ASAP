@@ -147,7 +147,8 @@ const f1=v=>v==null||isNaN(v)?'–':v.toFixed(1);
 const hms=m=>{if(m==null||isNaN(m))return '–';const s=Math.round(m*60);return Math.floor(s/3600)+':'+String(Math.floor(s%3600/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
 const tm=s=>{if(s==null||s==='')return null;const p=String(s).trim().split(':').map(Number);if(p.some(isNaN))return null;while(p.length<3)p.unshift(0);return p[0]*60+p[1]+p[2]/60};
 function rd(f,cb){const r=new FileReader();r.onload=e=>cb(XLSX.read(e.target.result,{type:'array',cellDates:true}));r.readAsArrayBuffer(f)}
-$('fp').onchange=e=>rd(e.target.files[0],wb=>{const ws=wb.Sheets[wb.SheetNames[0]];P=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});const F=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});const h=Object.keys(P[0]||{}),kr=h.find(k=>/dmt.*rm/i.test(k)),kf=h.find(k=>/dmt.*ref/i.test(k));P.forEach((r,i)=>{r.__rm=kr?tm(F[i][kr]):null;r.__rf=kf?tm(F[i][kf]):null});st();render()});
+let DM={rm:null,rf:null};const tv=v=>typeof v==='number'?v*1440:tm(v);
+$('fp').onchange=e=>rd(e.target.files[0],wb=>{const ws=wb.Sheets[wb.SheetNames.find(n=>/extract/i.test(n))||wb.SheetNames[0]];P=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});const wd=wb.Sheets[wb.SheetNames.find(n=>/^dmt$/i.test(n.trim()))];DM={rm:null,rf:null};if(wd){const a=[],b=[];XLSX.utils.sheet_to_json(wd,{defval:'',raw:true}).forEach(r=>{const x=tv(r['DMT RM']),y=tv(r['DMT REFUS']);if(x>0)a.push(x);if(y>0)b.push(y)});if(a.length)DM.rm=a.reduce((s,v)=>s+v,0)/a.length;if(b.length)DM.rf=b.reduce((s,v)=>s+v,0)/b.length}st();$('st').textContent+=' · DMT: '+(wd?'onglet trouvé':'onglet introuvable');render()});
 $('fr').onchange=e=>rd(e.target.files[0],wb=>{
  const s=wb.SheetNames.find(n=>/nq/i.test(n)&&!/obj/i.test(n))||wb.SheetNames[0];
  R=XLSX.utils.sheet_to_json(wb.Sheets[s],{defval:''});
@@ -223,8 +224,8 @@ function render(){
  const kd=K('DMT moyen',r.dmt==null?'–':hms(r.dmt),'cible '+hms(dmtG),'d',bd(r.dmt,dmtG));
  const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
  $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
- const vS=D.S.reduce((s,x)=>s+x.vS,0),vN=D.S.reduce((s,x)=>s+x.vN,0),rS=D.S.reduce((s,x)=>s+x.rS,0),rN=D.S.reduce((s,x)=>s+x.rN,0);
-$('k2').innerHTML=kd+K('DMT RM moyen',vN?hms(vS/vN):'–','','d')+K('DMT Refus moyen',rN?hms(rS/rN):'–','','d');
+const vS=D.S.reduce((s,x)=>s+x.vS,0),vN=D.S.reduce((s,x)=>s+x.vN,0),rS=D.S.reduce((s,x)=>s+x.rS,0),rN=D.S.reduce((s,x)=>s+x.rN,0);
+$('k2').innerHTML=K('DMT RM moyen',DM.rm==null?'–':hms(DM.rm),'objectif 5 min','d')+K('DMT Refus moyen',DM.rf==null?'–':hms(DM.rf),'','d');
  $('k3').innerHTML=kq;
  // sites
  $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
