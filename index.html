@@ -115,7 +115,7 @@ button{border-radius:20px}
 <div class="imp">
 <label class="dz"><b>Prod M ASAP</b> (xlsx)<input type="file" id="fp" accept=".xlsx,.xls"></label>
 <label class="dz dz2"><b>RC ASAP – NQ + Objectif NQ</b> (xlsx)<input type="file" id="fr" accept=".xlsx,.xls"></label>
-<span class="sp" id="st">En attente des fichiers</span></div>
+<span class="sp" id="st">En attente des fichiers</span><button class="bof" id="clr">Vider les données</button>
 <div class="tabs" id="tabs"></div>
 <div class="fbar"><span>Site :</span><span id="sites"></span><span style="margin-left:10px">Du</span><input type="date" class="dp" id="d1"><span>au</span><input type="date" class="dp" id="d2">
 <button class="bof" id="rz">Réinitialiser</button><input class="srch" id="sr" placeholder="Rechercher un agent…"><button class="bxl" id="xl" style="margin-left:auto">⬇ Export Excel</button><button class="bof" onclick="print()">🖨 Imprimer</button></div>
@@ -188,7 +188,12 @@ $('fr').onchange=e=>rd(e.target.files[0],wb=>{
  if(so){const o=XLSX.utils.sheet_to_json(wb.Sheets[so],{defval:''})[0];if(o){const g=re=>{const k=fk(o,re);return k?parseFloat(o[k]):null};
   OBJ={Mauvaise:g(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':g(/non/i)??OBJ['Non-conforme'],Loupé:g(/^lou/i)??OBJ.Loupé};SV('obj',OBJ)}}
  st();render()});
-function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`}
+const DB={ 
+ o:()=>new Promise((ok,ko)=>{const q=indexedDB.open('asap_db',1);q.onupgradeneeded=()=>q.result.createObjectStore('s');q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)}), 
+ async set(k,v){const d=await DB.o();return new Promise((ok,ko)=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(v,k);t.oncomplete=ok;t.onerror=()=>ko(t.error)})}, 
+ async get(k){const d=await DB.o();return new Promise((ok,ko)=>{const q=d.transaction('s').objectStore('s').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}};
+ function saveAll(){DB.set('data',{P,R,DM,DMA,LST,ts:Date.now()}).catch(()=>{})}
+ function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`;saveAll()}
 function applyTheme(){document.documentElement.dataset.theme=theme;$('tm').textContent=theme=='dark'?'☀ Mode clair':'🌙 Mode sombre';
  Chart.defaults.color=theme=='dark'?'#cbd5e1':'#6b7280';Chart.defaults.borderColor=theme=='dark'?'#2d3f55':'#eef1f4'}
 $('tm').onclick=()=>{theme=theme=='dark'?'light':'dark';SV('theme',theme);render()};
@@ -322,4 +327,6 @@ $('xl').onclick=()=>{if(!LAST)return;const D=LAST;
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.nq),'NQ');
  XLSX.writeFile(wb,'Dashboard_ASAP_'+new Date().toISOString().slice(0,10)+'.xlsx')};
 render();
+ $('clr').onclick=()=>{if(confirm('Vider les données enregistrées ?'))DB.set('data',null).then(()=>location.reload())};
+ DB.get('data').then(s=>{if(!s)return;P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes · Listes: '+LST.length+' agents'}).catch(()=>{});
 </script></body></html>
