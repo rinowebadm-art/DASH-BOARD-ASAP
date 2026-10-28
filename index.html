@@ -110,12 +110,15 @@ button{border-radius:20px}
  .k:has(.kpi.q) .kpi{grid-column:span 6}
  .k:has(.kpi.q) .kpi.q{grid-column:span 10}
 </style></head><body>
+ <div id="lg" style="position:fixed;inset:0;z-index:9999;background:#1f2937;display:flex;align-items:center;justify-content:center"><form id="lf" style="background:#fff;padding:28px;border-radius:16px;display:flex;flex-direction:column;gap:10px;width:300px;color:#1f2937"><b>Dashboard Production ASAP</b><input id="lu" placeholder="Identifiant" autocomplete="username" style="padding:8px"><input id="lp" type="password" placeholder="Mot de passe" autocomplete="current-password" style="padding:8px"><button class="bon" style="padding:9px">Connexion</button><small id="le" style="color:#c0392b"></small></form></div>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
 <div class="imp">
 <label class="dz"><b>Prod M ASAP</b> (xlsx)<input type="file" id="fp" accept=".xlsx,.xls"></label>
 <label class="dz dz2"><b>RC ASAP – NQ + Objectif NQ</b> (xlsx)<input type="file" id="fr" accept=".xlsx,.xls"></label>
-<span class="sp" id="st">En attente des fichiers</span><button class="bof" id="clr">Vider les données</button>
+<span class="sp" id="st">En attente des fichiers</span>
+ <button class="bon" id="pub">Publier (data.enc)</button>
+</div>
 <div class="tabs" id="tabs"></div>
 <div class="fbar"><span>Site :</span><span id="sites"></span><span style="margin-left:10px">Du</span><input type="date" class="dp" id="d1"><span>au</span><input type="date" class="dp" id="d2">
 <button class="bof" id="rz">Réinitialiser</button><input class="srch" id="sr" placeholder="Rechercher un agent…"><button class="bxl" id="xl" style="margin-left:auto">⬇ Export Excel</button><button class="bof" onclick="print()">🖨 Imprimer</button></div>
@@ -188,12 +191,7 @@ $('fr').onchange=e=>rd(e.target.files[0],wb=>{
  if(so){const o=XLSX.utils.sheet_to_json(wb.Sheets[so],{defval:''})[0];if(o){const g=re=>{const k=fk(o,re);return k?parseFloat(o[k]):null};
   OBJ={Mauvaise:g(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':g(/non/i)??OBJ['Non-conforme'],Loupé:g(/^lou/i)??OBJ.Loupé};SV('obj',OBJ)}}
  st();render()});
-const DB={ 
- o:()=>new Promise((ok,ko)=>{const q=indexedDB.open('asap_db',1);q.onupgradeneeded=()=>q.result.createObjectStore('s');q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)}), 
- async set(k,v){const d=await DB.o();return new Promise((ok,ko)=>{const t=d.transaction('s','readwrite');t.objectStore('s').put(v,k);t.oncomplete=ok;t.onerror=()=>ko(t.error)})}, 
- async get(k){const d=await DB.o();return new Promise((ok,ko)=>{const q=d.transaction('s').objectStore('s').get(k);q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error)})}};
- function saveAll(){DB.set('data',{P,R,DM,DMA,LST,ts:Date.now()}).catch(()=>{})}
- function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`;saveAll()}
+function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`}
 function applyTheme(){document.documentElement.dataset.theme=theme;$('tm').textContent=theme=='dark'?'☀ Mode clair':'🌙 Mode sombre';
  Chart.defaults.color=theme=='dark'?'#cbd5e1':'#6b7280';Chart.defaults.borderColor=theme=='dark'?'#2d3f55':'#eef1f4'}
 $('tm').onclick=()=>{theme=theme=='dark'?'light':'dark';SV('theme',theme);render()};
@@ -326,7 +324,19 @@ $('xl').onclick=()=>{if(!LAST)return;const D=LAST;
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(si),'Sites');
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.nq),'NQ');
  XLSX.writeFile(wb,'Dashboard_ASAP_'+new Date().toISOString().slice(0,10)+'.xlsx')};
-render();
- $('clr').onclick=()=>{if(confirm('Vider les données enregistrées ?'))DB.set('data',null).then(()=>location.reload())};
- DB.get('data').then(s=>{if(!s)return;P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes · Listes: '+LST.length+' agents'}).catch(()=>{});
+const enc=new TextEncoder(),dec=new TextDecoder();
+ async function dkey(pw,salt){const m=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+ const gz=async b=>new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+ const ungz=async b=>new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+ async function seal(o,pw){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const c=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await dkey(pw,salt),await gz(enc.encode(JSON.stringify(o)))));const r=new Uint8Array(28+c.length);r.set(salt);r.set(iv,16);r.set(c,28);return r}
+ async function unseal(buf,pw){const b=new Uint8Array(buf);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(16,28)},await dkey(pw,b.slice(0,16)),b.slice(28));return JSON.parse(dec.decode(await ungz(p)))}
+ let CRED='';
+ function apply(s){P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];OBJ=s.OBJ||OBJ;dmtG=s.dmtG||dmtG;dmtA=s.dmtA||dmtA;map=s.map||map;render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes'}
+ $('lf').onsubmit=async e=>{e.preventDefault();CRED=$('lu').value.trim().toLowerCase()+':'+$('lp').value;$('le').textContent=''; 
+let r;try{r=await fetch('data.enc?'+Date.now())}catch(x){} 
+if(r&&r.ok){try{apply(await unseal(await r.arrayBuffer(),CRED))}catch(x){$('le').textContent='Identifiant ou mot de passe incorrect';return}} 
+$('lg').remove()};
+$('pub').onclick=async()=>{if(!P.length&&!R.length){alert('Importez d\'abord vos fichiers.');return} 
+const o=await seal({P,R,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()},CRED); 
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([o]));a.download='data.enc';a.click()};render();
 </script></body></html>
