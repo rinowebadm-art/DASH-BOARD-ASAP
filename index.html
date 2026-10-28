@@ -10,6 +10,7 @@ const f=v=>typeof v==='string'?(M[v.toLowerCase()]||v):Array.isArray(v)?v.map(f)
 Chart.defaults.font.family="'Inter','Segoe UI',sans-serif";
 Chart.defaults.borderRadius=4;
 </script>
+
 <style>
 :root{--bg:#eef1f4;--bg2:#fff;--bg3:#f7f9fb;--bd:#dde3ea;--txt:#1f2937;--txt3:#6b7280;--blue:#2e75b6;--sh:0 1px 3px rgba(20,30,50,.08)}
 [data-theme=dark]{--bg:#0f172a;--bg2:#1e293b;--bg3:#243044;--bd:#334155;--txt:#e2e8f0;--txt3:#94a3b8;--blue:#3b82f6;--sh:0 1px 6px rgba(0,0,0,.4)}
@@ -77,6 +78,34 @@ body{background:linear-gradient(180deg,var(--bg),var(--bg3))}
 .bon{background:#4a89c4}.tab.on{border-bottom-color:#cf7433}
 .hd{background:linear-gradient(135deg,#2b3358,#4a89c4)}
 .badge{background:#cf7433}
+/* ===== AJOUT : imports en bas, KPI agrandis, cartes pastel ===== */
+body{display:flex;flex-direction:column;min-height:100vh;background:var(--bg)}
+.imp{order:99;margin-top:auto;padding:5px 20px;gap:8px;border-top:1px solid var(--bd);border-bottom:none;background:transparent;opacity:.7}
+.imp:hover{opacity:1}
+label.dz{flex:0 1 220px;min-width:160px;padding:4px 8px;font-size:11px;border-width:1px}
+.sp{font-size:11px;padding:3px 10px}
+.hd{min-height:64px;padding:14px 28px}
+.hd h1{font-size:24px}
+.main{padding:18px 24px}
+.k{grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.kpi{border:none;border-left:none!important;border-radius:18px;padding:20px 22px;box-shadow:none;position:relative}
+.kpi::before{content:"";position:absolute;top:16px;left:20px;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.65)}
+.kpi .kl{margin-top:44px;font-size:12px;font-weight:700;letter-spacing:.5px;color:#4b5563}
+.kpi .kv{font-size:40px;line-height:1.15;color:#1f2937}
+.kpi .ks{font-size:12px;color:#6b7280}
+.kb{font-size:11px;padding:3px 9px;top:12px;right:12px}
+.k .kpi:nth-child(5n+1){background:#d6f1fb}
+.k .kpi:nth-child(5n+2){background:#e4e0fb}
+.k .kpi:nth-child(5n+3){background:#d9f6ea}
+.k .kpi:nth-child(5n+4){background:#f6dffa}
+.k .kpi:nth-child(5n+5){background:#fde9d3}
+.kpi.q{background:#fde2e2!important}
+.card{border:none;border-radius:20px;padding:18px;box-shadow:0 2px 12px rgba(80,90,140,.06)}
+.ct{font-size:14px;font-weight:700;text-transform:none;margin-bottom:12px}
+.g2,.g3{gap:16px}
+.tab{border-radius:20px 20px 0 0}
+.tab.on{background:#8b7cf0;color:#fff;border-bottom-color:transparent}
+button{border-radius:20px}
 </style></head><body>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
