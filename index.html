@@ -267,6 +267,7 @@ function render(){
  for(let i=0;i<6;i++)$('p'+i).classList.toggle('on',i==tab);
  $('oD').value=dmtG;$('oM').value=OBJ.Mauvaise;$('oN').value=OBJ['Non-conforme'];$('oL').value=OBJ.Loupé;
  const D=LAST=build(),T=tot(D.ag),r=rates(T);
+ const wav=(f,w)=>{let s=0,n=0;D.ag.forEach(a=>{if(a[f]!=null&&a[w]>0){s+=a[f]*a[w];n+=a[w]}});return n?s/n:null};const filt=site!=='Tous'||$('sr').value!=='';const mRm=filt?wav('dRm','va'):DM.rm, mRf=filt?wav('dRf','re'):DM.rf;
  $('sites').innerHTML=['Tous',...D.sites].map(s=>`<button class="${s==site?'bon':'bof'}" data-s="${s}">${s}</button>`).join(' ');
  document.querySelectorAll('#sites button').forEach(b=>b.onclick=()=>{site=b.dataset.s;render()});
  const dk=Object.keys(D.days).filter(d=>d!='?').sort();
@@ -276,10 +277,10 @@ function render(){
  ab.querySelectorAll('select').forEach(s=>s.onchange=()=>{if(s.value){map[s.dataset.u]=s.value;SV('map',map);render()}});
  // KPI
  const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.rM,OBJ.Mauvaise))+K('Non-conforme',pc(r.rN),`${T.NC} NQ · obj ${pc(OBJ['Non-conforme'])}`,'q',bd(r.rN,OBJ['Non-conforme']))+K('Loupé',pc(r.rL),`${T.L} NQ · obj ${pc(OBJ.Loupé)}`,'q',bd(r.rL,OBJ.Loupé));
- const kd=K('DMT RM',DM.rm==null?'–':hms(DM.rm),'Validés · cible '+hms(dmtG),'d',bd(DM.rm,dmtG))+K('DMT Refus',DM.rf==null?'–':hms(DM.rf),'Refusés · cible '+hms(dmtG),'d',bd(DM.rf,dmtG));
+ const kd=K('DMT RM',mRm==null?'–':hms(mRm),'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG))+K('DMT Refus',mRf==null?'–':hms(mRf),'Refusés · cible '+hms(dmtG),'d',bd(mRf,dmtG));
  const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
 $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
-$('k2').innerHTML=K('DMT RM moyen',DM.rm==null?'–':hms(DM.rm),'','d')+K('DMT Refus moyen',DM.rf==null?'–':hms(DM.rf),'','d');
+$('k2').innerHTML=K('DMT RM moyen',mRm==null?'–':hms(mRm),site==='Tous'?'':'Site : '+site,'d')+K('DMT Refus moyen',mRf==null?'–':hms(mRf),site==='Tous'?'':'Site : '+site,'d');
 $('k3').innerHTML=kq;
  // sites
  $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT RM</th><th>DMT Refus</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
