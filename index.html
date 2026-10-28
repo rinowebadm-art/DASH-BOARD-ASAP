@@ -109,6 +109,22 @@ button{border-radius:20px}
  .k:has(.kpi.q){grid-template-columns:repeat(30,1fr)}
  .k:has(.kpi.q) .kpi{grid-column:span 6}
  .k:has(.kpi.q) .kpi.q{grid-column:span 10}
+ /* ===== Correctif mode sombre ===== */
+ body{color:var(--txt)}
+ .ct,.cfg,.fbar,.fbar span,.imp,.imp b,.card,label{color:var(--txt)}
+ [data-theme=dark] .kpi.q{background:#2a3150!important}
+ [data-theme=dark] .k .kpi:nth-child(5n+1){background:#1f3b4d}
+ [data-theme=dark] .k .kpi:nth-child(5n+2){background:#2d2b52}
+ [data-theme=dark] .k .kpi:nth-child(5n+3){background:#1f4038}
+ [data-theme=dark] .k .kpi:nth-child(5n+4){background:#41284a}
+ [data-theme=dark] .k .kpi:nth-child(5n+5){background:#4a3624}
+ [data-theme=dark] .kpi::before{background:rgba(255,255,255,.12)}
+ [data-theme=dark] .kpi .kv{color:#f1f5f9}
+ [data-theme=dark] .kpi .kl{color:#cbd5e1}
+ [data-theme=dark] .kpi .ks{color:#94a3b8}
+ [data-theme=dark] .bof,[data-theme=dark] .srch,[data-theme=dark] .dp{color:var(--txt)}
+ [data-theme=dark] .tab{color:var(--txt3)}
+ [data-theme=dark] .tab.on{color:#fff}
 </style></head><body>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
 <div style="text-align:right;font-size:11px"><button class="tm" onclick="unlockAdmin()">Déverrouiller admin</button><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
