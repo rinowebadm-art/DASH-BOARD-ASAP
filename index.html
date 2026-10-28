@@ -110,14 +110,13 @@ button{border-radius:20px}
  .k:has(.kpi.q) .kpi{grid-column:span 6}
  .k:has(.kpi.q) .kpi.q{grid-column:span 10}
 </style></head><body>
- <div id="lg" style="position:fixed;inset:0;z-index:9999;background:#1f2937;display:flex;align-items:center;justify-content:center"><form id="lf" style="background:#fff;padding:28px;border-radius:16px;display:flex;flex-direction:column;gap:10px;width:300px;color:#1f2937"><b>Dashboard Production ASAP</b><input id="lu" placeholder="Identifiant" autocomplete="username" style="padding:8px"><input id="lp" type="password" placeholder="Mot de passe" autocomplete="current-password" style="padding:8px"><button class="bon" style="padding:9px">Connexion</button><small id="le" style="color:#c0392b"></small></form></div>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
-<div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
+<div style="text-align:right;font-size:11px"><button class="tm" onclick="unlockAdmin()">Déverrouiller admin</button><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
 <div class="imp">
 <label class="dz"><b>Prod M ASAP</b> (xlsx)<input type="file" id="fp" accept=".xlsx,.xls"></label>
 <label class="dz dz2"><b>RC ASAP – NQ + Objectif NQ</b> (xlsx)<input type="file" id="fr" accept=".xlsx,.xls"></label>
 <span class="sp" id="st">En attente des fichiers</span>
- <button class="bon" id="pub">Publier (data.enc)</button>
+<button class="bon" id="pub">Publier sur GitHub</button>
 </div>
 <div class="tabs" id="tabs"></div>
 <div class="fbar"><span>Site :</span><span id="sites"></span><span style="margin-left:10px">Du</span><input type="date" class="dp" id="d1"><span>au</span><input type="date" class="dp" id="d2">
@@ -324,19 +323,31 @@ $('xl').onclick=()=>{if(!LAST)return;const D=LAST;
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(si),'Sites');
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.nq),'NQ');
  XLSX.writeFile(wb,'Dashboard_ASAP_'+new Date().toISOString().slice(0,10)+'.xlsx')};
-const enc=new TextEncoder(),dec=new TextDecoder();
- async function dkey(pw,salt){const m=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
- const gz=async b=>new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
- const ungz=async b=>new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
- async function seal(o,pw){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));const c=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await dkey(pw,salt),await gz(enc.encode(JSON.stringify(o)))));const r=new Uint8Array(28+c.length);r.set(salt);r.set(iv,16);r.set(c,28);return r}
- async function unseal(buf,pw){const b=new Uint8Array(buf);const p=await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(16,28)},await dkey(pw,b.slice(0,16)),b.slice(28));return JSON.parse(dec.decode(await ungz(p)))}
- let CRED='';
- function apply(s){P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];OBJ=s.OBJ||OBJ;dmtG=s.dmtG||dmtG;dmtA=s.dmtA||dmtA;map=s.map||map;render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes'}
- $('lf').onsubmit=async e=>{e.preventDefault();CRED=$('lu').value.trim().toLowerCase()+':'+$('lp').value;$('le').textContent=''; 
-let r;try{r=await fetch('data.enc?'+Date.now())}catch(x){} 
-if(r&&r.ok){try{apply(await unseal(await r.arrayBuffer(),CRED))}catch(x){$('le').textContent='Identifiant ou mot de passe incorrect';return}} 
-$('lg').remove()};
-$('pub').onclick=async()=>{if(!P.length&&!R.length){alert('Importez d\'abord vos fichiers.');return} 
-const o=await seal({P,R,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()},CRED); 
-const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([o]));a.download='data.enc';a.click()};render();
+function apply(s){P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];OBJ=s.OBJ||OBJ;dmtG=s.dmtG||dmtG;dmtA=s.dmtA||dmtA;map=s.map||map;render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes'}
+const GH_OWNER='rinowebadm-art',GH_REPO='DASH-BOARD-ASAP',GH_PATH='data.json',ADMIN_PASS='ChangezMoi123';
+let GH_TOKEN='',isAdmin=false;
+$('fp').disabled=true;$('fr').disabled=true;$('pub').style.display='none';
+function unlockAdmin(){
+ if(prompt('Mot de passe admin :')!==ADMIN_PASS){alert('Mot de passe incorrect.');return}
+ GH_TOKEN=prompt('Collez votre token GitHub (jamais stocké) :');
+ if(!GH_TOKEN)return;
+ isAdmin=true;$('fp').disabled=false;$('fr').disabled=false;$('pub').style.display='';
+ alert('Mode admin activé.');
+}
+async function loadShared(){
+ try{const r=await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?`+Date.now());
+ if(!r.ok)return;apply(await r.json())}catch(e){console.warn('Pas de data.json')}
+}
+$('pub').onclick=async()=>{
+ if(!isAdmin)return;
+ if(!P.length&&!R.length){alert('Importez d\'abord vos fichiers.');return}
+ const b64=btoa(unescape(encodeURIComponent(JSON.stringify({P,R,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()}))));
+ const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+ const H={Authorization:'token '+GH_TOKEN};
+ const cur=await fetch(api,{headers:H}).then(r=>r.ok?r.json():null);
+ const res=await fetch(api,{method:'PUT',headers:{...H,'Content-Type':'application/json'},
+  body:JSON.stringify({message:'Mise à jour dashboard '+new Date().toISOString(),content:b64,sha:cur?cur.sha:undefined})});
+ alert(res.ok?'Publié sur GitHub.':'Échec de la publication ('+res.status+')');
+};
+render();loadShared();
 </script></body></html>
