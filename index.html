@@ -125,13 +125,13 @@ button{border-radius:20px}
  [data-theme=dark] .bof,[data-theme=dark] .srch,[data-theme=dark] .dp{color:var(--txt)}
  [data-theme=dark] .tab{color:var(--txt3)}
  [data-theme=dark] .tab.on{color:#fff}
-/* ===== Titre agrandi ===== */
- .hd{min-height:120px;padding:22px 32px}
- .ttl{gap:20px}
- .logo{width:68px;height:68px;border-radius:20px;font-size:36px}
- .hd h1{font-size:34px;letter-spacing:2px;line-height:1.15}
- .hd .sub{font-size:15px;margin-top:6px;letter-spacing:.8px}
- .hd h1 .badge{font-size:14px;padding:4px 12px}
+/* ===== Titre amélioré ===== */
+ .ttl{display:flex;align-items:center;gap:14px}
+ .logo{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center;font-size:24px}
+ .hd h1{font-size:22px;font-weight:800;letter-spacing:1.5px;line-height:1.2}
+ .hd h1 em{font-style:normal;font-weight:900;color:#ffd9b8}
+ .hd .sub{font-size:12px;opacity:.75;margin-top:3px;letter-spacing:.5px;font-weight:500}
+ .hd{min-height:84px;box-shadow:0 4px 18px rgba(43,51,88,.25)}
 </style></head><body>
 <div class="hd"><div class="ttl"><div class="logo">▦</div><div><h1>DASHBOARD SOFTWARE <em>PRODUCTION ASAP</em><span class="badge" id="wk">–</span></h1><div class="sub">Production · DMT · Qualité</div></div></div>
 <div style="text-align:right;font-size:11px"><button class="tm" onclick="unlockAdmin()">Déverrouiller admin</button><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
