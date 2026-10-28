@@ -116,7 +116,6 @@ button{border-radius:20px}
 <label class="dz"><b>Prod M ASAP</b> (xlsx)<input type="file" id="fp" accept=".xlsx,.xls"></label>
 <label class="dz dz2"><b>RC ASAP – NQ + Objectif NQ</b> (xlsx)<input type="file" id="fr" accept=".xlsx,.xls"></label>
 <span class="sp" id="st">En attente des fichiers</span>
-<button class="bon" id="pub">Publier sur GitHub</button>
 </div>
 <div class="tabs" id="tabs"></div>
 <div class="fbar"><span>Site :</span><span id="sites"></span><span style="margin-left:10px">Du</span><input type="date" class="dp" id="d1"><span>au</span><input type="date" class="dp" id="d2">
@@ -326,36 +325,33 @@ $('xl').onclick=()=>{if(!LAST)return;const D=LAST;
 function apply(s){P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];OBJ=s.OBJ||OBJ;dmtG=s.dmtG||dmtG;dmtA=s.dmtA||dmtA;map=s.map||map;render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes'}
 const GH_OWNER='rinowebadm-art',GH_REPO='DASH-BOARD-ASAP',GH_PATH='data.json',ADMIN_PASS='ChangezMoi123';
 let GH_TOKEN='',isAdmin=false;
-$('fp').disabled=true;$('fr').disabled=true;$('pub').style.display='none';
+$('fp').disabled=true;$('fr').disabled=true;
 function unlockAdmin(){
  if(prompt('Mot de passe admin :')!==ADMIN_PASS){alert('Mot de passe incorrect.');return}
  GH_TOKEN=prompt('Collez votre token GitHub (jamais stocké) :');
  if(!GH_TOKEN)return;
- isAdmin=true;$('fp').disabled=false;$('fr').disabled=false;$('pub').style.display='';
+ isAdmin=true;$('fp').disabled=false;$('fr').disabled=false;
  alert('Mode admin activé.');
 }
 async function loadShared(){
  try{const r=await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?`+Date.now());
  if(!r.ok)return;apply(await r.json())}catch(e){console.warn('Pas de data.json')}
 }
-$('pub').onclick=async()=>{
- if(!isAdmin)return;
- if(!P.length&&!R.length){alert('Importez d\'abord vos fichiers.');return}
- const b64=btoa(unescape(encodeURIComponent(JSON.stringify({P,R,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()}))));
- const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
- const H={Authorization:'token '+GH_TOKEN};
- const cur=await fetch(api,{headers:H}).then(r=>r.ok?r.json():null);
- const res=await fetch(api,{method:'PUT',headers:{...H,'Content-Type':'application/json'},
-  body:JSON.stringify({message:'Mise à jour dashboard '+new Date().toISOString(),content:b64,sha:cur?cur.sha:undefined})});
- alert(res.ok?'Publié sur GitHub.':'Échec de la publication ('+res.status+')');
-};
 render();loadShared();
-async function pushNow(){ 
-if(!isAdmin||!GH_TOKEN)return; 
-const b64=btoa(unescape(encodeURIComponent(JSON.stringify({P,R,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()})))); 
-const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`; const H={Authorization:'token '+GH_TOKEN}; 
-const cur=await fetch(api,{headers:H}).then(r=>r.ok?r.json():null); 
-const res=await fetch(api,{method:'PUT',headers:{...H,'Content-Type':'application/json'},  
-body:JSON.stringify({message:'MAJ '+new Date().toISOString(),content:b64,sha:cur?cur.sha:undefined})}); 
-$('st').textContent+=res.ok?' · Publié ✔':' · Échec publication ('+res.status+')';}
+let pq=Promise.resolve();
+function pushNow(){pq=pq.then(push0,push0);return pq}
+async function push0(){
+ if(!isAdmin||!GH_TOKEN)return;
+ const sl=(A,res,extra)=>{if(!A.length)return [];const ks=[...extra,...res.map(re=>fk(A[0],re))].filter(Boolean);return A.map(r=>{const o={};ks.forEach(k=>o[k]=r[k]);return o})};
+ const Ps=sl(P,[/^etat/i,/site/i,/motif/i],['Traité par','DH traitement']);
+ const Rs=sl(R,[/collaborateur/i,/cat/i,/imputable/i,/cause/i,/indexation/i],[]);
+ try{
+  const b64=btoa(unescape(encodeURIComponent(JSON.stringify({P:Ps,R:Rs,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()}))));
+  const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+  const H={Authorization:'token '+GH_TOKEN};
+  const cur=await fetch(api+'?t='+Date.now(),{headers:H,cache:'no-store'}).then(r=>r.ok?r.json():null);
+  const res=await fetch(api,{method:'PUT',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({message:'MAJ '+new Date().toISOString(),content:b64,sha:cur?cur.sha:undefined})});
+  $('st').textContent=$('st').textContent.replace(/ · (Publié ✔|Échec.*|Erreur.*)$/,'')+(res.ok?' · Publié ✔':' · Échec publication ('+res.status+')');
+ }catch(e){$('st').textContent+=' · Erreur : '+e.message}
+}
 </script></body></html>
