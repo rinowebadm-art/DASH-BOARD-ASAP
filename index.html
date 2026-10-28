@@ -182,14 +182,14 @@ const hms=m=>{if(m==null||isNaN(m))return '–';const s=Math.round(m*60);return 
 const tm=s=>{if(s==null||s==='')return null;const p=String(s).trim().split(':').map(Number);if(p.some(isNaN))return null;while(p.length<3)p.unshift(0);return p[0]*60+p[1]+p[2]/60};
 function rd(f,cb){const r=new FileReader();r.onload=e=>cb(XLSX.read(e.target.result,{type:'array',cellDates:true}));r.readAsArrayBuffer(f)}
 let DM={rm:null,rf:null},DMA={};const SN={TANA:'Tana',DIEGO:'Diégo'};let LST=[];function loadLst(w){const n=w.SheetNames.find(x=>/^liste/i.test(x.trim()));LST=[];if(!n)return; XLSX.utils.sheet_to_json(w.Sheets[n],{defval:''}).forEach(r=>{const k=Object.keys(r),g=re=>r[k.find(x=>re.test(norm(x)))];  const s=SN[String(g(/^site/)).trim().toUpperCase()];if(!s)return;  LST.push({s,nom:norm(g(/^nom$/)).replace(/[^a-z]/g,''),k:key2(g(/client/)||g(/^nom$/))})})}const siteOf=w=>{const k=key2(w);let h=LST.find(x=>x.k===k); if(!h){const nw=norm(w).replace(/[^a-z]/g,'');h=LST.find(x=>x.nom.length>3&&nw.includes(x.nom))} if(!h){let bd=99;LST.forEach(x=>{const d=lev(k,x.k);if(d<bd){bd=d;h=x}});if(bd>2)h=null} return h?h.s:'-'};
-$('fp').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr0=new FileReader();fr0.onload=ev=>{const buf=ev.target.result;const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames.find(n=>/extract/i.test(n))||wb.SheetNames[0]];P=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});const w2=XLSX.read(buf,{type:'array',cellDates:false});const wd=w2.Sheets[w2.SheetNames.find(n=>/^dmt$/i.test(n.trim()))];DM={rm:null,rf:null};DMA={};let ex='';if(wd){const T=v=>{if(typeof v==='number')return v>0&&v<1?v*1440:null;const m=String(v||'').match(/^\s*(\d+):(\d{2})(?::(\d{2}(?:\.\d+)?))?\s*$/);if(!m)return null;return m[3]!==undefined?(+m[1])*60+(+m[2])+(+m[3])/60:(+m[1])+(+m[2])/60};const a=[],b=[],g={};const rows=XLSX.utils.sheet_to_json(wd,{defval:'',raw:true});rows.forEach(r=>{const kr=Object.keys(r),x=T(r[kr.find(k=>/^dmt\s*rm/i.test(k))]),y=T(r[kr.find(k=>/^dmt\s*refus/i.test(k))]),o=r[kr.find(k=>/op[eé]rateur/i.test(k))];if(x>0)a.push(x);if(y>0)b.push(y);if(o&&(x>0||y>0)){const k=key2(o),z=g[k]||(g[k]={r:[],f:[]});if(x>0)z.r.push(x);if(y>0)z.f.push(y)}});const av=l=>l.length?l.reduce((s,v)=>s+v,0)/l.length:null;Object.keys(g).forEach(k=>DMA[k]={rm:av(g[k].r),rf:av(g[k].f)});DM.rm=av(a);DM.rf=av(b);ex=' · RM '+hms(DM.rm)+' · Refus '+hms(DM.rf)}loadLst(w2);st();$('st').textContent+=' · Listes: '+LST.length+' agents · DMT: '+(wd?'onglet trouvé ('+Object.keys(DMA).length+' agents)'+ex:'onglet introuvable');render()};fr0.readAsArrayBuffer(f)};
+$('fp').onchange=e=>{const f=e.target.files[0];if(!f)return;const fr0=new FileReader();fr0.onload=ev=>{const buf=ev.target.result;const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames.find(n=>/extract/i.test(n))||wb.SheetNames[0]];P=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});const w2=XLSX.read(buf,{type:'array',cellDates:false});const wd=w2.Sheets[w2.SheetNames.find(n=>/^dmt$/i.test(n.trim()))];DM={rm:null,rf:null};DMA={};let ex='';if(wd){const T=v=>{if(typeof v==='number')return v>0&&v<1?v*1440:null;const m=String(v||'').match(/^\s*(\d+):(\d{2})(?::(\d{2}(?:\.\d+)?))?\s*$/);if(!m)return null;return m[3]!==undefined?(+m[1])*60+(+m[2])+(+m[3])/60:(+m[1])+(+m[2])/60};const a=[],b=[],g={};const rows=XLSX.utils.sheet_to_json(wd,{defval:'',raw:true});rows.forEach(r=>{const kr=Object.keys(r),x=T(r[kr.find(k=>/^dmt\s*rm/i.test(k))]),y=T(r[kr.find(k=>/^dmt\s*refus/i.test(k))]),o=r[kr.find(k=>/op[eé]rateur/i.test(k))];if(x>0)a.push(x);if(y>0)b.push(y);if(o&&(x>0||y>0)){const k=key2(o),z=g[k]||(g[k]={r:[],f:[]});if(x>0)z.r.push(x);if(y>0)z.f.push(y)}});const av=l=>l.length?l.reduce((s,v)=>s+v,0)/l.length:null;Object.keys(g).forEach(k=>DMA[k]={rm:av(g[k].r),rf:av(g[k].f)});DM.rm=av(a);DM.rf=av(b);ex=' · RM '+hms(DM.rm)+' · Refus '+hms(DM.rf)}loadLst(w2);st();$('st').textContent+=' · Listes: '+LST.length+' agents · DMT: '+(wd?'onglet trouvé ('+Object.keys(DMA).length+' agents)'+ex:'onglet introuvable');render();pushNow()};fr0.readAsArrayBuffer(f)};
 $('fr').onchange=e=>rd(e.target.files[0],wb=>{
  const s=wb.SheetNames.find(n=>/nq/i.test(n)&&!/obj/i.test(n))||wb.SheetNames[0];
  R=XLSX.utils.sheet_to_json(wb.Sheets[s],{defval:''});
  const so=wb.SheetNames.find(n=>/obj/i.test(n));
  if(so){const o=XLSX.utils.sheet_to_json(wb.Sheets[so],{defval:''})[0];if(o){const g=re=>{const k=fk(o,re);return k?parseFloat(o[k]):null};
   OBJ={Mauvaise:g(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':g(/non/i)??OBJ['Non-conforme'],Loupé:g(/^lou/i)??OBJ.Loupé};SV('obj',OBJ)}}
- st();render()});
+ st();render();pushNow()});
 function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`}
 function applyTheme(){document.documentElement.dataset.theme=theme;$('tm').textContent=theme=='dark'?'☀ Mode clair':'🌙 Mode sombre';
  Chart.defaults.color=theme=='dark'?'#cbd5e1':'#6b7280';Chart.defaults.borderColor=theme=='dark'?'#2d3f55':'#eef1f4'}
@@ -350,4 +350,12 @@ $('pub').onclick=async()=>{
  alert(res.ok?'Publié sur GitHub.':'Échec de la publication ('+res.status+')');
 };
 render();loadShared();
+async function pushNow(){ 
+if(!isAdmin||!GH_TOKEN)return; 
+const b64=btoa(unescape(encodeURIComponent(JSON.stringify({P,R,DM,DMA,LST,OBJ,dmtG,dmtA,map,ts:Date.now()})))); 
+const api=`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`; const H={Authorization:'token '+GH_TOKEN}; 
+const cur=await fetch(api,{headers:H}).then(r=>r.ok?r.json():null); 
+const res=await fetch(api,{method:'PUT',headers:{...H,'Content-Type':'application/json'},  
+body:JSON.stringify({message:'MAJ '+new Date().toISOString(),content:b64,sha:cur?cur.sha:undefined})}); 
+$('st').textContent+=res.ok?' · Publié ✔':' · Échec publication ('+res.status+')';}
 </script></body></html>
