@@ -172,7 +172,7 @@ function build(){
  const gs=n=>S[n]||(S[n]={n,tr:0,va:0,re:0,dS:0,dN:0,vS:0,vN:0,rS:0,rN:0,M:0,NC:0,L:0});
  const ga=(n,s)=>A[n]||(A[n]={n,site:s||'–',tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
  P.forEach(r=>{const who=r['Traité par']||'';if(!who||/^ai /i.test(who))return;
-  let s=(kS&&r[kS])||'-';if(/adm/i.test(s)){const z=siteOf(who);if(z!=='-')s=z}if(site!=='Tous'&&s!==site)return;
+  let s=(kS&&r[kS])||'-';if(/adm/i.test(s)){const z=siteOf(who);s=z!=='-'?z:'Non classé'}if(site!=='Tous'&&s!==site)return;
   const t=toD(r['DH traitement']);if(t){const dk=iso(t);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
   const a=ga(who,s),sg=gs(s);a.tr++;sg.tr++;const e=kE?r[kE]:'';
   const ref=e==='Refusé';if(e==='Validé'){a.va++;sg.va++}else if(ref){a.re++;sg.re++;const m=(kM&&r[kM])||'Non renseigné';motifs[m]=(motifs[m]||0)+1}
@@ -191,7 +191,7 @@ function build(){
  const q=$('sr').value.toLowerCase();
  let ag=Object.values(A).filter(a=>a.n.toLowerCase().includes(q));
  const ks=P[0]&&fk(P[0],/site/i);
- return {ag,days,motifs,bins,S:Object.values(S),un,cs,causes,nq,keys:Object.keys(A).filter(n=>!n.endsWith('*')),sites:[...new Set(P.filter(r=>r['Traité par']&&!/^ai /i.test(r['Traité par'])).map(r=>{let s=(ks&&r[ks])||'';if(/adm/i.test(s)){const z=siteOf(r['Traité par']);if(z!=='-')s=z}return s}).filter(Boolean))]};
+ return {ag,days,motifs,bins,S:Object.values(S),un,cs,causes,nq,keys:Object.keys(A).filter(n=>!n.endsWith('*')),sites:[...new Set(P.filter(r=>r['Traité par']&&!/^ai /i.test(r['Traité par'])).map(r=>{let s=(ks&&r[ks])||'';if(/adm/i.test(s)){const z=siteOf(r['Traité par']);s=z!=='-'?z:'Non classé'}return s}).filter(Boolean))]};
 }
 const tot=L=>L.reduce((s,a)=>({tr:s.tr+a.tr,va:s.va+a.va,re:s.re+a.re,dS:s.dS+a.dS,dN:s.dN+a.dN,M:s.M+a.M,NC:s.NC+a.NC,L:s.L+a.L}),{tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
 const rates=a=>({dmt:a.dN?a.dS/a.dN:null,rM:a.va?a.M/a.va:null,rN:a.va?a.NC/a.va:null,rL:a.re?a.L/a.re:null});
