@@ -10,7 +10,6 @@ const f=v=>typeof v==='string'?(M[v.toLowerCase()]||v):Array.isArray(v)?v.map(f)
 Chart.defaults.font.family="'Inter','Segoe UI',sans-serif";
 Chart.defaults.borderRadius=4;
 </script>
-
 <style>
 :root{--bg:#eef1f4;--bg2:#fff;--bg3:#f7f9fb;--bd:#dde3ea;--txt:#1f2937;--txt3:#6b7280;--blue:#2e75b6;--sh:0 1px 3px rgba(20,30,50,.08)}
 [data-theme=dark]{--bg:#0f172a;--bg2:#1e293b;--bg3:#243044;--bd:#334155;--txt:#e2e8f0;--txt3:#94a3b8;--blue:#3b82f6;--sh:0 1px 6px rgba(0,0,0,.4)}
@@ -106,6 +105,10 @@ label.dz{flex:0 1 220px;min-width:160px;padding:4px 8px;font-size:11px;border-wi
 .tab{border-radius:20px 20px 0 0}
 .tab.on{background:#8b7cf0;color:#fff;border-bottom-color:transparent}
 button{border-radius:20px}
+ /* ===== Production en haut (5 cartes) / Qualité en bas (3 cartes) ===== */
+ .k:has(.kpi.q){grid-template-columns:repeat(30,1fr)}
+ .k:has(.kpi.q) .kpi{grid-column:span 6}
+ .k:has(.kpi.q) .kpi.q{grid-column:span 10}
 </style></head><body>
 <div class="hd"><h1>DASHBOARD PRODUCTION ASAP<span class="badge" id="wk">–</span></h1>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
