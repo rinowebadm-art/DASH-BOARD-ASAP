@@ -372,7 +372,7 @@ function convertir(j){
  const O=t=>(t&&t.h?t.r.map(r=>{const o={};t.h.forEach((k,i)=>o[k]=r[i]);return o}):[]);
  const ex=j.Extract,ix=re=>ex.h.findIndex(h=>re.test(h));
  const iE=ix(/^etat/i),iS=ix(/site/i),iM=ix(/motif/i),iW=ex.h.indexOf('Traité par'),iT=ex.h.indexOf('DH traitement');
- const P=ex.r.map(r=>({"Etat de l'extrait":r[iE],Site:r[iS],"Motif de refus":r[iM],'Traité par':r[iW],'DH traitement':r[iT]}));
+ const iN=ex.h.indexOf('N');const P=[];ex.r.forEach(r=>{const o={"Etat de l'extrait":r[iE],Site:r[iS],"Motif de refus":r[iM],'Traité par':r[iW],'DH traitement':r[iT]};const n=iN>=0?r[iN]:1;for(let k=0;k<n;k++)P.push(o)});
  const av=l=>l.length?l.reduce((s,v)=>s+v,0)/l.length:null;
  const dh=j.DMT.h,ko=dh.find(k=>/op[eé]rateur/i.test(k)),kx=dh.find(k=>/^dmt\s*rm/i.test(k)),ky=dh.find(k=>/^dmt\s*refus/i.test(k));
  const a=[],b=[],g={},DMA={};
