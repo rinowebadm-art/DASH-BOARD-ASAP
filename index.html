@@ -246,8 +246,9 @@ function build(){
   const t=toD(r['DH traitement']);if(t){const dk=iso(t);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
   const a=ga(who,s),sg=gs(s);a.tr++;sg.tr++;const e=kE?r[kE]:'';
   const ref=e==='Refusé';if(e==='Validé'){a.va++;sg.va++}else if(ref){a.re++;sg.re++;const m=(kM&&r[kM])||'Non renseigné';motifs[m]=(motifs[m]||0)+1}
- const dk=t?iso(t):'?';(days[dk]=days[dk]||{tr:0,va:0,re:0,dS:0,dN:0});days[dk].tr++;ref?days[dk].re++:days[dk].va++}); 
+ const dk=t?iso(t):'?';(days[dk]=days[dk]||{tr:0,va:0,re:0,dS:0,dN:0});days[dk].tr++;ref?days[dk].re++:days[dk].va++;(days[dk].ag=days[dk].ag||{})[who]=(days[dk].ag[who]||0)+1});
  Object.values(A).forEach(a=>{const d=DMW.length?dmaFor(key2(a.n),d1,d2):DMA[key2(a.n)];if(!d)return;a.dRm=d.rm;a.dRf=d.rf;const w=(d.rm!=null?a.va:0)+(d.rf!=null?a.re:0);if(!w)return;a.dS=((d.rm!=null?d.rm*a.va:0)+(d.rf!=null?d.rf*a.re:0))/w;a.dN=1;const sg=gs(a.site);sg.dS+=a.dS;sg.dN++;if(d.rm!=null){sg.vS+=d.rm;sg.vN++}if(d.rf!=null){sg.rS+=d.rf;sg.rN++}bins[a.dS<5?0:a.dS<=15?1:2]++});
+ Object.values(days).forEach(d=>{Object.entries(d.ag||{}).forEach(([n,c])=>{const a=A[n];if(a&&a.dN){d.dS+=a.dS*c;d.dN+=c}})});
  const keys=Object.keys(A).map(n=>({n,k:key2(n)}));const un=[],cs={},causes={},nq=[];
  const kc=R[0]&&fk(R[0],/collaborateur/i),kg=R[0]&&fk(R[0],/cat/i),ki=R[0]&&fk(R[0],/imputable/i),kcr=R[0]&&fk(R[0],/cause/i),kdt=R[0]&&fk(R[0],/indexation/i);
  R.forEach(r=>{if(!kc||!r[kc])return;if(ki&&String(r[ki]).trim().toUpperCase()!=='O')return;
@@ -296,7 +297,7 @@ const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.r
 const kd=K('DMT RM',mRm==null?'–':hms(mRm),'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG),arw(mRm,dmtG))+K('DMT Refus',mRf==null?'–':hms(mRf),'Refusés · cible '+hms(dmtG),'d',bd(mRf,dmtG),arw(mRf,dmtG));
 const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
 $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
-$('k2').innerHTML=K('DMT RM moyen',mRm==null?'–':hms(mRm),site==='Tous'?'':'Site : '+site,'d')+K('DMT Refus moyen',mRf==null?'–':hms(mRf),site==='Tous'?'':'Site : '+site,'d');
+$('k2').innerHTML=K('DMT RM moyen',mRm==null?'–':hms(mRm),(site==='Tous'?'':'Site : '+site+' · ')+'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG),arw(mRm,dmtG))+K('DMT Refus moyen',mRf==null?'–':hms(mRf),(site==='Tous'?'':'Site : '+site+' · ')+'Refusés · cible '+hms(dmtG),'d',bd(mRf,dmtG),arw(mRf,dmtG));
 $('k3').innerHTML=kq;
  // sites
  $('sh').innerHTML='<tr><th>Site</th><th>Traités</th><th>Refus %</th><th>DMT RM</th><th>DMT Refus</th><th>Taux M</th><th>Taux NC</th><th>Taux L</th></tr>';
