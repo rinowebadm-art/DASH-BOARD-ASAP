@@ -267,9 +267,9 @@ if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
 const tot=L=>L.reduce((s,a)=>({tr:s.tr+a.tr,va:s.va+a.va,re:s.re+a.re,dS:s.dS+a.dS,dN:s.dN+a.dN,M:s.M+a.M,NC:s.NC+a.NC,L:s.L+a.L}),{tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
 const rates=a=>({dmt:a.dN?a.dS/a.dN:null,rM:a.va?a.M/a.va:null,rN:a.va?a.NC/a.va:null,rL:a.re?a.L/a.re:null});
 const cl=(v,o)=>v==null?'':v<=o?'g':v<=o*1.5?'o':'r';
+const bd=(v,o)=>v==null?'':`<span class="kb ${v<=o?'kok':v<=o*1.5?'kwn':'kbd'}">${v<=o?'OK':v<=o*1.5?'Proche':'Hors obj.'}</span>`;
 const arw=(v,o)=>v==null?'':`<div class="kar ${v<=o?'up':v<=o*1.5?'wn':'dn'}">${v<=o?'▲':'▼'}</div>`;
 const K=(l,v,s,c,b,a)=>`<div class="kpi ${c||''}">${a||''}${b||''}<div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||''}</div></div>`;
-const K=(l,v,s,c,b)=>`<div class="kpi ${c||''}">${b||''}<div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||''}</div></div>`;
 const mk=(id,cfg)=>{if(CH[id])CH[id].destroy();cfg.options=Object.assign({responsive:true},cfg.options||{});
 if(['c1','c3','c4'].includes(id)){cfg.options.scales=Object.assign({},cfg.options.scales,{y:{ticks:{callback:v=>hms(v)}}});cfg.options.plugins=Object.assign({},cfg.options.plugins,{tooltip:{callbacks:{label:c=>c.dataset.label+' : '+hms(c.parsed.y)}}})}
 CH[id]=new Chart($(id),cfg)};
