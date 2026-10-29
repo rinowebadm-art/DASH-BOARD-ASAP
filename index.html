@@ -277,7 +277,7 @@ function render(){
  for(let i=0;i<6;i++)$('p'+i).classList.toggle('on',i==tab);
  $('oD').value=dmtG;$('oM').value=OBJ.Mauvaise;$('oN').value=OBJ['Non-conforme'];$('oL').value=OBJ.Loupé;
  const D=LAST=build(),T=tot(D.ag),r=rates(T);
- const wav=(f,w)=>{let s=0,n=0;D.ag.forEach(a=>{if(a[f]!=null&&a[w]>0){s+=a[f]*a[w];n+=a[w]}});return n?s/n:null};const filt=site!=='Tous'||$('sr').value!=='';const mRm=filt?wav('dRm','va'):DM.rm, mRf=filt?wav('dRf','re'):DM.rf;
+ const wav=(f,w)=>{let s=0,n=0;D.ag.forEach(a=>{if(a[f]!=null&&a[w]>0){s+=a[f]*a[w];n+=a[w]}});return n?s/n:null};const filt=true;const mRm=filt?wav('dRm','va'):DM.rm, mRf=filt?wav('dRf','re'):DM.rf;
  $('sites').innerHTML=['Tous',...D.sites].map(s=>`<button class="${s==site?'bon':'bof'}" data-s="${s}">${s}</button>`).join(' ');
  document.querySelectorAll('#sites button').forEach(b=>b.onclick=()=>{site=b.dataset.s;render()});
  const dk=Object.keys(D.days).filter(d=>d!='?').sort();
@@ -376,7 +376,7 @@ function convertir(j){
  const av=l=>l.length?l.reduce((s,v)=>s+v,0)/l.length:null;
  const dh=j.DMT.h,ko=dh.find(k=>/op[eé]rateur/i.test(k)),kx=dh.find(k=>/^dmt\s*rm/i.test(k)),ky=dh.find(k=>/^dmt\s*refus/i.test(k));
  const a=[],b=[],g={},DMA={};
- O(j.DMT).forEach(r=>{const x=+r[kx],y=+r[ky],o=r[ko];if(x>0)a.push(x);if(y>0)b.push(y);
+ O(j.DMT).forEach(r=>{const x=+r[kx]/60,y=+r[ky]/60,o=r[ko];if(x>0)a.push(x);if(y>0)b.push(y);
   if(o&&(x>0||y>0)){const k=key2(o),z=g[k]||(g[k]={r:[],f:[]});if(x>0)z.r.push(x);if(y>0)z.f.push(y)}});
  Object.keys(g).forEach(k=>DMA[k]={rm:av(g[k].r),rf:av(g[k].f)});
  const L2=[];
