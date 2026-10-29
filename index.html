@@ -134,6 +134,11 @@ button{border-radius:20px}
  .hd{min-height:84px;box-shadow:0 4px 18px rgba(43,51,88,.25)}
  .ab,.ab.on{display:none!important}
  label.dz{display:none!important}
+ /* ===== Flèches dans les pastilles ===== */
+ .kar{position:absolute;top:16px;left:20px;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;z-index:1}
+ .kar.up{background:#3fc7ab}
+ .kar.dn{background:#ee7770}
+ .kar.wn{background:#f7cd3d}
 </style></head><body>
 <div class="hd"><div class="ttl"><div class="logo">▦</div><div><h1>DASHBOARD SOFTWARE <em>PRODUCTION ASAP</em><span class="badge" id="wk">–</span></h1><div class="sub">Production · DMT · Qualité</div></div></div>
 <div style="text-align:right;font-size:11px"><button class="tm" onclick="unlockAdmin()">Déverrouiller admin</button><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
@@ -262,7 +267,8 @@ if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
 const tot=L=>L.reduce((s,a)=>({tr:s.tr+a.tr,va:s.va+a.va,re:s.re+a.re,dS:s.dS+a.dS,dN:s.dN+a.dN,M:s.M+a.M,NC:s.NC+a.NC,L:s.L+a.L}),{tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
 const rates=a=>({dmt:a.dN?a.dS/a.dN:null,rM:a.va?a.M/a.va:null,rN:a.va?a.NC/a.va:null,rL:a.re?a.L/a.re:null});
 const cl=(v,o)=>v==null?'':v<=o?'g':v<=o*1.5?'o':'r';
-const bd=(v,o)=>v==null?'':`<span class="kb ${v<=o?'kok':v<=o*1.5?'kwn':'kbd'}">${v<=o?'OK':v<=o*1.5?'Alerte':'Critique'}</span>`;
+const arw=(v,o)=>v==null?'':`<div class="kar ${v<=o?'up':v<=o*1.5?'wn':'dn'}">${v<=o?'▲':'▼'}</div>`;
+const K=(l,v,s,c,b,a)=>`<div class="kpi ${c||''}">${a||''}${b||''}<div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||''}</div></div>`;
 const K=(l,v,s,c,b)=>`<div class="kpi ${c||''}">${b||''}<div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||''}</div></div>`;
 const mk=(id,cfg)=>{if(CH[id])CH[id].destroy();cfg.options=Object.assign({responsive:true},cfg.options||{});
 if(['c1','c3','c4'].includes(id)){cfg.options.scales=Object.assign({},cfg.options.scales,{y:{ticks:{callback:v=>hms(v)}}});cfg.options.plugins=Object.assign({},cfg.options.plugins,{tooltip:{callbacks:{label:c=>c.dataset.label+' : '+hms(c.parsed.y)}}})}
@@ -286,9 +292,9 @@ function render(){
  ab.innerHTML='<b>Noms NQ non rapprochés :</b> '+D.un.map(u=>`${u} → <select data-u="${u.replace(/"/g,'&quot;')}"><option value="">—</option>${D.keys.map(k=>`<option>${k}</option>`).join('')}</select>`).join('');
  ab.querySelectorAll('select').forEach(s=>s.onchange=()=>{if(s.value){map[s.dataset.u]=s.value;SV('map',map);render()}});
  // KPI
- const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.rM,OBJ.Mauvaise))+K('Non-conforme',pc(r.rN),`${T.NC} NQ · obj ${pc(OBJ['Non-conforme'])}`,'q',bd(r.rN,OBJ['Non-conforme']))+K('Loupé',pc(r.rL),`${T.L} NQ · obj ${pc(OBJ.Loupé)}`,'q',bd(r.rL,OBJ.Loupé));
- const kd=K('DMT RM',mRm==null?'–':hms(mRm),'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG))+K('DMT Refus',mRf==null?'–':hms(mRf),'Refusés · cible '+hms(dmtG),'d',bd(mRf,dmtG));
- const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
+const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.rM,OBJ.Mauvaise),arw(r.rM,OBJ.Mauvaise))+K('Non-conforme',pc(r.rN),`${T.NC} NQ · obj ${pc(OBJ['Non-conforme'])}`,'q',bd(r.rN,OBJ['Non-conforme']),arw(r.rN,OBJ['Non-conforme']))+K('Loupé',pc(r.rL),`${T.L} NQ · obj ${pc(OBJ.Loupé)}`,'q',bd(r.rL,OBJ.Loupé),arw(r.rL,OBJ.Loupé));
+const kd=K('DMT RM',mRm==null?'–':hms(mRm),'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG),arw(mRm,dmtG))+K('DMT Refus',mRf==null?'–':hms(mRf),'Refusés · cible '+hms(dmtG),'d',bd(mRf,dmtG),arw(mRf,dmtG));
+const kp=K('Traités',T.tr,'hors refus IA')+K('Validés',T.va,'')+K('Refusés',T.re,T.tr?(T.re/T.tr*100).toFixed(1)+' % de refus':'','s');
 $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
 $('k2').innerHTML=K('DMT RM moyen',mRm==null?'–':hms(mRm),site==='Tous'?'':'Site : '+site,'d')+K('DMT Refus moyen',mRf==null?'–':hms(mRf),site==='Tous'?'':'Site : '+site,'d');
 $('k3').innerHTML=kq;
