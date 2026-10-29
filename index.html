@@ -142,6 +142,8 @@ button{border-radius:20px}
 </div>
 <div class="tabs" id="tabs"></div>
 <div class="fbar"><span>Site :</span><span id="sites"></span><span style="margin-left:10px">Du</span><input type="date" class="dp" id="d1"><span>au</span><input type="date" class="dp" id="d2">
+ <select class="dp" id="sw"><option value="">Semaine…</option></select>
+ <select class="dp" id="sm"><option value="">Mois…</option></select>
 <button class="bof" id="rz">Réinitialiser</button><input class="srch" id="sr" placeholder="Rechercher un agent…"><button class="bxl" id="xl" style="margin-left:auto">⬇ Export Excel</button><button class="bof" onclick="print()">🖨 Imprimer</button></div>
 <div class="ab" id="ab"></div>
 <div class="main">
@@ -212,7 +214,7 @@ $('fr').onchange=e=>rd(e.target.files[0],wb=>{
  if(so){const o=XLSX.utils.sheet_to_json(wb.Sheets[so],{defval:''})[0];if(o){const g=re=>{const k=fk(o,re);return k?parseFloat(o[k]):null};
   OBJ={Mauvaise:g(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':g(/non/i)??OBJ['Non-conforme'],Loupé:g(/^lou/i)??OBJ.Loupé};SV('obj',OBJ)}}
  st();render();pushNow()});
-function st(){$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`}
+function st(){fillPeriods();$('st').className='sp ok';$('st').textContent=`Prod : ${P.length} lignes · NQ : ${R.length} lignes`}
 function applyTheme(){document.documentElement.dataset.theme=theme;$('tm').textContent=theme=='dark'?'☀ Mode clair':'🌙 Mode sombre';
  Chart.defaults.color=theme=='dark'?'#cbd5e1':'#6b7280';Chart.defaults.borderColor=theme=='dark'?'#2d3f55':'#eef1f4'}
 $('tm').onclick=()=>{theme=theme=='dark'?'light':'dark';SV('theme',theme);render()};
@@ -346,7 +348,7 @@ $('xl').onclick=()=>{if(!LAST)return;const D=LAST;
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(si),'Sites');
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(D.nq),'NQ');
  XLSX.writeFile(wb,'Dashboard_ASAP_'+new Date().toISOString().slice(0,10)+'.xlsx')};
-function apply(s){P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];OBJ=s.OBJ||OBJ;dmtG=s.dmtG||dmtG;dmtA=s.dmtA||dmtA;map=s.map||map;render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes'}
+function apply(s){P=s.P||[];R=s.R||[];DM=s.DM||{rm:null,rf:null};DMA=s.DMA||{};LST=s.LST||[];OBJ=s.OBJ||OBJ;dmtG=s.dmtG||dmtG;dmtA=s.dmtA||dmtA;map=s.map||map;fillPeriods();render();$('st').className='sp ok';$('st').textContent='Données du '+new Date(s.ts).toLocaleString('fr-FR')+' · Prod : '+P.length+' lignes · NQ : '+R.length+' lignes'}
 const GH_OWNER='rinowebadm-art',GH_REPO='DASH-BOARD-ASAP',GH_PATH='data.json',ADMIN_PASS='ChangezMoi123';
 let GH_TOKEN='',isAdmin=false;
 $('fp').disabled=true;$('fr').disabled=true;
@@ -361,6 +363,19 @@ async function loadShared(){
  try{const r=await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?`+Date.now());
  if(!r.ok)return;apply(await r.json())}catch(e){console.warn('Pas de data.json')}
 }
+ function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=t.getUTCFullYear();return [y,Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7)]}
+ function monday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+ function fillPeriods(){ 
+  const W={},M={}; 
+  P.forEach(r=>{const t=toD(r['DH traitement']);if(!t)return;const [y,w]=isoWeek(t);W[iso(monday(t))]='S'+w+' '+y;M[iso(t).slice(0,7)]=1}); 
+  $('sw').innerHTML='<option value="">Semaine…</option>'+Object.keys(W).sort().reverse().map(k=>{const e=new Date(k);e.setDate(e.getDate()+6);return `<option value="${k}|${iso(e)}">${W[k]} (${k.slice(8)}/${k.slice(5,7)})</option>`}).join(''); 
+  $('sm').innerHTML='<option value="">Mois…</option>'+Object.keys(M).sort().reverse().map(k=>{const [y,m]=k.split('-').map(Number);const last=iso(new Date(y,m,0));const lb=new Date(y,m-1,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'});return `<option value="${k}-01|${last}">${lb}</option>`}).join('');
+ }
+ function setPer(sel,other){const v=sel.value;other.value='';if(!v)return;const [a,b]=v.split('|');$('d1').value=a;$('d2').value=b;render()}
+ $('sw').onchange=()=>setPer($('sw'),$('sm'));
+ $('sm').onchange=()=>setPer($('sm'),$('sw'));
+ ['d1','d2'].forEach(id=>$(id).addEventListener('input',()=>{$('sw').value=$('sm').value=''}));
+ $('rz').addEventListener('click',()=>{$('sw').value=$('sm').value=''});
 render();loadShared();
 let pq=Promise.resolve();
 function pushNow(){pq=pq.then(push0,push0);return pq}
