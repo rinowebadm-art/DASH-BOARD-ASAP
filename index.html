@@ -366,9 +366,30 @@ function unlockAdmin(){
  isAdmin=true;$('fp').disabled=false;$('fr').disabled=false;
  alert('Mode admin activé.');
 }
+function convertir(j){
+ if(!j.Extract||!j.Extract.h)return j;
+ const O=t=>(t&&t.h?t.r.map(r=>{const o={};t.h.forEach((k,i)=>o[k]=r[i]);return o}):[]);
+ const ex=j.Extract,ix=re=>ex.h.findIndex(h=>re.test(h));
+ const iE=ix(/^etat/i),iS=ix(/site/i),iM=ix(/motif/i),iW=ex.h.indexOf('Traité par'),iT=ex.h.indexOf('DH traitement');
+ const P=ex.r.map(r=>({"Etat de l'extrait":r[iE],Site:r[iS],"Motif de refus":r[iM],'Traité par':r[iW],'DH traitement':r[iT]}));
+ const av=l=>l.length?l.reduce((s,v)=>s+v,0)/l.length:null;
+ const dh=j.DMT.h,ko=dh.find(k=>/op[eé]rateur/i.test(k)),kx=dh.find(k=>/^dmt\s*rm/i.test(k)),ky=dh.find(k=>/^dmt\s*refus/i.test(k));
+ const a=[],b=[],g={},DMA={};
+ O(j.DMT).forEach(r=>{const x=+r[kx],y=+r[ky],o=r[ko];if(x>0)a.push(x);if(y>0)b.push(y);
+  if(o&&(x>0||y>0)){const k=key2(o),z=g[k]||(g[k]={r:[],f:[]});if(x>0)z.r.push(x);if(y>0)z.f.push(y)}});
+ Object.keys(g).forEach(k=>DMA[k]={rm:av(g[k].r),rf:av(g[k].f)});
+ const L2=[];
+ O(j.Listes).forEach(r=>{const k=Object.keys(r),h=re=>r[k.find(x=>re.test(norm(x)))];
+  const s=SN[String(h(/^site/)).trim().toUpperCase()];if(!s)return;
+  L2.push({s,nom:norm(h(/^nom$/)).replace(/[^a-z]/g,''),k:key2(h(/client/)||h(/^nom$/))})});
+ let ob=OBJ;const o=O(j.ObjectifNQ)[0];
+ if(o){const q=re=>{const k=Object.keys(o).find(x=>re.test(x));return k?parseFloat(o[k]):null};
+  ob={Mauvaise:q(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':q(/non/i)??OBJ['Non-conforme'],Loupé:q(/^lou/i)??OBJ.Loupé}}
+ return {P,R:O(j.NQ),DM:{rm:av(a),rf:av(b)},DMA,LST:L2,OBJ:ob,ts:j.ts||Date.now()};
+}
 async function loadShared(){
  try{const r=await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?`+Date.now());
- if(!r.ok)return;apply(await r.json())}catch(e){console.warn('Pas de data.json')}
+ if(!r.ok)return;apply(convertir(await r.json()))}catch(e){console.warn('Erreur data.json',e)}
 }
  function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=t.getUTCFullYear();return [y,Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7)]}
  function monday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
@@ -387,7 +408,7 @@ render();loadShared();
 let pq=Promise.resolve();
 function pushNow(){pq=pq.then(push0,push0);return pq}
 async function push0(){
- if(!isAdmin||!GH_TOKEN)return;
+return;
  const sl=(A,res,extra)=>{if(!A.length)return [];const ks=[...extra,...res.map(re=>fk(A[0],re))].filter(Boolean);return A.map(r=>{const o={};ks.forEach(k=>o[k]=r[k]);return o})};
  const Ps=sl(P,[/^etat/i,/site/i,/motif/i],['Traité par','DH traitement']);
  const Rs=sl(R,[/collaborateur/i,/cat/i,/imputable/i,/cause/i,/indexation/i],[]);
