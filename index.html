@@ -172,7 +172,7 @@ button{border-radius:20px}
  <div class="card"><div class="ct">Objectifs NQ (ratios)</div><div class="cfg">Mauvaise <input id="oM" type="number" step="0.0001"> Non-conforme <input id="oN" type="number" step="0.0001"> Loupé <input id="oL" type="number" step="0.00001">
  <small style="color:var(--txt3)">Mauvaise et NC ÷ Validés · Loupé ÷ Refusés</small></div></div>
  <div class="g3"><div class="card"><div class="ct">NQ par catégorie et site</div><canvas id="d1c" height="170"></canvas></div>
- <div class="card"><div class="ct">Causes racines</div><canvas id="d2" height="170"></canvas></div>
+ <div class="card"><div class="ct">Top agents par NQ</div><canvas id="d2" height="170"></canvas></div>
  <div class="card"><div class="ct">Taux par site vs objectif (%)</div><canvas id="d3" height="170"></canvas></div></div>
  <div class="g3"><div class="card"><div class="ct">NQ par catégorie</div><canvas id="d4" height="170"></canvas></div>
  <div class="card"><div class="ct">NQ par site</div><canvas id="d5" height="170"></canvas></div>
@@ -223,7 +223,12 @@ $('tm').onclick=()=>{theme=theme=='dark'?'light':'dark';SV('theme',theme);render
 ['d1','d2','sr'].forEach(id=>$(id).oninput=render);
 $('rk').onchange=render;
 $('rz').onclick=()=>{$('d1').value=$('d2').value=$('sr').value='';site='Tous';render()};
-
+const MFR=['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'];
+const toDF=v=>{if(!v)return null;if(v instanceof Date)return v; 
+const s=norm(v);let m=s.match(/(\d{1,2})\s+([a-z]+)\s+(\d{4})/); 
+if(m){const i=MFR.indexOf(m[2]);if(i>=0)return new Date(+m[3],i,+m[1])} m=s.match(/^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/); 
+if(m)return new Date(+m[3],+m[2]-1,+m[1]); 
+return toD(v)};
 function build(){
  const A={},days={},motifs={},bins=[0,0,0],S={};
  const kE=P[0]&&fk(P[0],/^etat/i),kS=P[0]&&fk(P[0],/site/i),kM=P[0]&&fk(P[0],/motif/i),kD=P[0]&&fk(P[0],/dmt/i);
@@ -240,7 +245,8 @@ function build(){
  const keys=Object.keys(A).map(n=>({n,k:key2(n)}));const un=[],cs={},causes={},nq=[];
  const kc=R[0]&&fk(R[0],/collaborateur/i),kg=R[0]&&fk(R[0],/cat/i),ki=R[0]&&fk(R[0],/imputable/i),kcr=R[0]&&fk(R[0],/cause/i),kdt=R[0]&&fk(R[0],/indexation/i);
  R.forEach(r=>{if(!kc||!r[kc])return;if(ki&&String(r[ki]).trim().toUpperCase()!=='O')return;
-  const dt=kdt&&toD(r[kdt]);if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
+ const dt=kdt&&toDF(r[kdt]);if((d1||d2)&&!dt)return;
+if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
   const nm=r[kc];let t=map[nm];if(!t){const k=key2(nm);let b=null,bd=99;keys.forEach(x=>{const d=lev(k,x.k);if(d<bd){bd=d;b=x.n}});if(bd<=2)t=b}if(!t&&!A[nm]){const L=LST.find(x=>x.k===key2(nm));if(L){const m=keys.find(x=>x.k===L.k);if(m)t=m.n}}
   const c=r[kg],cn=/mauv/i.test(c)?'Mauvaise':/non/i.test(c)?'Non-conforme':/lou/i.test(c)?'Loupé':null;if(!cn)return;
   let a=t&&A[t];if(!a){if(site!=='Tous'&&Object.keys(A).length)return;if(!un.includes(nm))un.push(nm);a=ga(nm+' *')}
@@ -332,7 +338,7 @@ $('k3').innerHTML=kq;
  if(tab==3){
   const cats=['Mauvaise','Non-conforme','Loupé'],ss=Object.keys(D.cs);
   mk('d1c',{type:'bar',data:{labels:cats,datasets:ss.map((s,i)=>({label:s,data:cats.map(c=>D.cs[s][c]),backgroundColor:COL[i%8]}))}});
-  mk('d2',{type:'bar',data:{labels:Object.keys(D.causes),datasets:[{label:'NQ',data:Object.values(D.causes),backgroundColor:'#2e75b6'}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+  {const tq=rows.map(a=>({...a,t:a.M+a.NC+a.L})).filter(a=>a.t>0).sort((a,b)=>b.t-a.t).slice(0,10);mk('d2',{type:'bar',data:{labels:tq.map(a=>a.n),datasets:[{label:'Mauvaise',data:tq.map(a=>a.M),backgroundColor:'#e74c3c'},{label:'Non-conforme',data:tq.map(a=>a.NC),backgroundColor:'#f39c12'},{label:'Loupé',data:tq.map(a=>a.L),backgroundColor:'#9b59b6'}]},options:{indexAxis:'y',scales:{x:{stacked:true},y:{stacked:true}}}})}
   mk('d3',{type:'bar',data:{labels:sn,datasets:[{label:'Mauvaise',data:D.S.map(s=>rates(s).rM*100),backgroundColor:'#e74c3c'},{label:'NC',data:D.S.map(s=>rates(s).rN*100),backgroundColor:'#f39c12'},{label:'Loupé',data:D.S.map(s=>rates(s).rL*100),backgroundColor:'#9b59b6'}]}});
   mk('d4',{type:'doughnut',data:{labels:cats,datasets:[{data:[T.M,T.NC,T.L],backgroundColor:['#e74c3c','#f39c12','#9b59b6']}]}});
   mk('d5',{type:'doughnut',data:{labels:sn,datasets:[{data:D.S.map(s=>s.M+s.NC+s.L),backgroundColor:COL}]}});
