@@ -240,7 +240,7 @@ function build(){
  const kc=R[0]&&fk(R[0],/collaborateur/i),kg=R[0]&&fk(R[0],/cat/i),ki=R[0]&&fk(R[0],/imputable/i),kcr=R[0]&&fk(R[0],/cause/i),kdt=R[0]&&fk(R[0],/indexation/i);
  R.forEach(r=>{if(!kc||!r[kc])return;if(ki&&String(r[ki]).trim().toUpperCase()!=='O')return;
   const dt=kdt&&toD(r[kdt]);if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
-  const nm=r[kc];let t=map[nm];if(!t){const k=key2(nm);let b=null,bd=99;keys.forEach(x=>{const d=lev(k,x.k);if(d<bd){bd=d;b=x.n}});if(bd<=2)t=b}
+  const nm=r[kc];let t=map[nm];if(!t){const k=key2(nm);let b=null,bd=99;keys.forEach(x=>{const d=lev(k,x.k);if(d<bd){bd=d;b=x.n}});if(bd<=2)t=b}if(!t&&!A[nm]){const L=LST.find(x=>x.k===key2(nm));if(L){const m=keys.find(x=>x.k===L.k);if(m)t=m.n}}
   const c=r[kg],cn=/mauv/i.test(c)?'Mauvaise':/non/i.test(c)?'Non-conforme':/lou/i.test(c)?'Loupé':null;if(!cn)return;
   let a=t&&A[t];if(!a){if(site!=='Tous'&&Object.keys(A).length)return;if(!un.includes(nm))un.push(nm);a=ga(nm+' *')}
   const key=cn=='Mauvaise'?'M':cn=='Non-conforme'?'NC':'L';a[key]++;gs(a.site)[key]++;
