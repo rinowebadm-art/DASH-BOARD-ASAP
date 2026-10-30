@@ -9,6 +9,14 @@ const M={'#2ecc71':'#3fc7ab','#e74c3c':'#ee7770','#d4a017':'#f7cd3d','#2e75b6':'
 const f=v=>typeof v==='string'?(M[v.toLowerCase()]||v):Array.isArray(v)?v.map(f):v;c.data.datasets.forEach(d=>{d.backgroundColor=f(d.backgroundColor);d.borderColor=f(d.borderColor)});}});
 Chart.defaults.font.family="'Inter','Segoe UI',sans-serif";
 Chart.defaults.borderRadius=4;
+Chart.defaults.plugins.legend.position='bottom';
+Chart.defaults.plugins.legend.labels.usePointStyle=true;
+Chart.defaults.plugins.legend.labels.boxWidth=8;
+Chart.defaults.elements.arc.borderWidth=0;
+Chart.defaults.elements.arc.borderRadius=10;
+Chart.defaults.elements.arc.spacing=3;
+Chart.defaults.datasets.doughnut.cutout='72%';
+Chart.register({id:'ctr',afterDraw(c){ if(c.config.type!=='doughnut')return; const t=c.data.datasets[0].data.reduce((a,b)=>a+(+b||0),0); const{left,right,top,bottom}=c.chartArea,x=(left+right)/2,y=(top+bottom)/2,g=c.ctx; g.save();g.textAlign='center';g.textBaseline='middle'; g.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--txt').trim()||'#333'; g.font='800 26px Inter';g.fillText(t.toLocaleString('fr-FR'),x,y-6); g.font='600 11px Inter';g.globalAlpha=.6;g.fillText('Total',x,y+16); g.restore();}});
 </script>
 <style>
 :root{--bg:#eef1f4;--bg2:#fff;--bg3:#f7f9fb;--bd:#dde3ea;--txt:#1f2937;--txt3:#6b7280;--blue:#2e75b6;--sh:0 1px 3px rgba(20,30,50,.08)}
@@ -139,6 +147,9 @@ button{border-radius:20px}
  .kar.up{background:#3fc7ab}
  .kar.dn{background:#ee7770}
  .kar.wn{background:#f7cd3d}
+ .card{box-shadow:0 8px 24px rgba(80,90,140,.12)}
+ [data-theme=dark] .card{box-shadow:0 8px 24px rgba(0,0,0,.45)}
+ .ct{letter-spacing:.3px}
 </style></head><body>
 <div class="hd"><div class="ttl"><div class="logo">▦</div><div><h1>DASHBOARD SOFTWARE <em>PRODUCTION ASAP</em><span class="badge" id="wk">–</span></h1><div class="sub">Production · DMT · Qualité</div></div></div>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
@@ -154,7 +165,6 @@ button{border-radius:20px}
 <button class="bof" id="rz">Réinitialiser</button><input class="srch" id="sr" placeholder="Rechercher un agent…"><button class="bxl" id="xl" style="margin-left:auto">⬇ Export Excel</button><button class="bof" onclick="print()">🖨 Imprimer</button></div>
 <div class="ab" id="ab"></div>
 <div class="main">
-
 <div class="pg" id="p0"><div class="k" id="k0"></div>
  <div class="g2"><div class="card"><div class="ct">Extraits traités par jour</div><canvas id="a1" height="140"></canvas></div>
  <div class="card"><div class="ct">Comparaison des sites</div><div class="tw"><table><thead id="sh"></thead><tbody id="sb"></tbody></table></div></div></div></div>
