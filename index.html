@@ -170,7 +170,7 @@ button{border-radius:20px}
  <div class="card"><div class="ct">Comparaison des sites</div><div class="tw"><table><thead id="sh"></thead><tbody id="sb"></tbody></table></div></div></div></div>
 
 <div class="pg" id="p1"><div class="k" id="k1"></div>
- <div class="card"><div class="ct">Objectifs Production (enregistrés dans le navigateur)</div><div class="cfg">Objectif traités (période) <input id="oT" type="number" step="1"> Seuil de refus max (%) <input id="oS" type="number" step="0.5"></div></div>
+ <div class="card"><div class="ct">Objectifs Production (enregistrés dans le navigateur)</div><div class="cfg">Seuil de refus max (%) <input id="oS" type="number" step="0.5"></div></div>
  <div class="g3"><div class="card"><div class="ct">Traités par site</div><canvas id="b1" height="170"></canvas></div>
  <div class="card"><div class="ct">Motifs de refus</div><canvas id="b2" height="170"></canvas></div>
  <div class="card"><div class="ct">Top agents (traités)</div><canvas id="b3" height="170"></canvas></div></div>
@@ -279,7 +279,7 @@ if(dt){const dk=iso(dt);if(d1&&dk<d1)return;if(d2&&dk>d2)return}
 const tot=L=>L.reduce((s,a)=>({tr:s.tr+a.tr,va:s.va+a.va,re:s.re+a.re,dS:s.dS+a.dS,dN:s.dN+a.dN,M:s.M+a.M,NC:s.NC+a.NC,L:s.L+a.L}),{tr:0,va:0,re:0,dS:0,dN:0,M:0,NC:0,L:0});
 const rates=a=>({dmt:a.dN?a.dS/a.dN:null,rM:a.va?a.M/a.va:null,rN:a.va?a.NC/a.va:null,rL:a.re?a.L/a.re:null});
 const cl=(v,o)=>v==null?'':v<=o?'g':v<=o*1.5?'o':'r';
-const bd=(v,o)=>v==null?'':`<span class="kb ${v<=o?'kok':v<=o*1.5?'kwn':'kbd'}">${v<=o?'OK':v<=o*1.5?'Proche':'Hors obj.'}</span>`;
+const bd=(v,o)=>v==null?'':`<span class="kb ${v<=o?'kok':v<=o*1.5?'kwn':'kbd'}">${v<=o?'OK':v<=o*1.5?'Proche':'Hors cible'}</span>`;
 const arw=(v,o)=>v==null?'':`<div class="kar ${v<=o?'up':v<=o*1.5?'wn':'dn'}">${v<=o?'▲':'▼'}</div>`;
 const K=(l,v,s,c,b,a)=>`<div class="kpi ${c||''}">${a||''}${b||''}<div class="kl">${l}</div><div class="kv">${v}</div><div class="ks">${s||''}</div></div>`;
 const mk=(id,cfg)=>{if(CH[id])CH[id].destroy();cfg.options=Object.assign({responsive:true},cfg.options||{});
@@ -287,20 +287,21 @@ if(['c1','c3','c4'].includes(id)){cfg.options.scales=Object.assign({},cfg.option
 CH[id]=new Chart($(id),cfg)};
 const COL=['#2e75b6','#c55a11','#2ecc71','#9b59b6','#e74c3c','#1abc9c','#d4a017','#7f8c8d'];
 let objT=LS('objT',0),seuilR=LS('seuilR',10);
- $('oT').onchange=()=>{objT=+$('oT').value||0;SV('objT',objT);render()};
- $('oS').onchange=()=>{seuilR=+$('oS').value||10;SV('seuilR',seuilR);render()};
- const bu=(v,o)=>!o?'':`<span class="kb ${v>=o?'kok':v>=o*.9?'kwn':'kbd'}">${v>=o?'Atteint':v>=o*.9?'Proche':'Hors obj.'}</span>`;
- const au=(v,o)=>!o?'':`<div class="kar ${v>=o?'up':v>=o*.9?'wn':'dn'}">${v>=o?'▲':'▼'}</div>`;
- function prevRange(d1,d2){if(!d1||!d2)return null;const a=new Date(d1),b=new Date(d2);const n=Math.round((b-a)/864e5)+1;const pe=new Date(a);pe.setDate(pe.getDate()-1);const ps=new Date(pe);ps.setDate(ps.getDate()-(n-1));return [iso(ps),iso(pe)]}
- function countP(a,b){let tr=0,va=0,re=0;P.forEach(r=>{const who=r['Traité par']||'';if(!who||/^ai /i.test(who))return;const ks=fk(r,/site/i);let s=(ks&&r[ks])||'-';if(/adm/i.test(s)){const z=siteOf(who);s=z!=='-'?z:'Non classé'}if(site!=='Tous'&&s!==site)return;const t=toD(r['DH traitement']);if(!t)return;const k=iso(t);if(k<a||k>b)return;const e=r[fk(r,/^etat/i)];tr++;if(e==='Validé')va++;else if(e==='Refusé')re++});return {tr,va,re}}
- let LAST;
+$('oS').onchange=()=>{seuilR=+$('oS').value||10;SV('seuilR',seuilR);render()};
+const bs=(v,o)=>v==null?'':`<span class="kb ${v<=o?'kok':v<=o*1.5?'kwn':'kbd'}">${v<=o?'Sous le seuil':v<=o*1.5?'Proche du seuil':'Au-dessus du seuil'}</span>`;
+const ev2=(c,p)=>p?(c/p-1)*100:null;const evS=e=>e==null?'Choisir une période pour comparer':`${e>=0?'+':''}${e.toFixed(1)} % vs période préc.`;
+const evB=e=>e==null?'':`<span class="kb ${e>=0?'kok':'kbd'}">${e>=0?'En hausse':'En baisse'}</span>`;
+const evA=e=>e==null?'':`<div class="kar ${e>=0?'up':'dn'}">${e>=0?'▲':'▼'}</div>`;
+function prevRange(d1,d2){if(!d1||!d2)return null;const a=new Date(d1),b=new Date(d2);const n=Math.round((b-a)/864e5)+1;const pe=new Date(a);pe.setDate(pe.getDate()-1);const ps=new Date(pe);ps.setDate(ps.getDate()-(n-1));return [iso(ps),iso(pe)]}
+function countP(a,b){let tr=0,va=0,re=0;P.forEach(r=>{const who=r['Traité par']||'';if(!who||/^ai /i.test(who))return;const ks=fk(r,/site/i);let s=(ks&&r[ks])||'-';if(/adm/i.test(s)){const z=siteOf(who);s=z!=='-'?z:'Non classé'}if(site!=='Tous'&&s!==site)return;const t=toD(r['DH traitement']);if(!t)return;const k=iso(t);if(k<a||k>b)return;const e=r[fk(r,/^etat/i)];tr++;if(e==='Validé')va++;else if(e==='Refusé')re++});return {tr,va,re}}
+let LAST;
 
 function render(){
  applyTheme();
  $('tabs').innerHTML=TABS.map((t,i)=>`<div class="tab ${i==tab?'on':''}" data-i="${i}">${t}</div>`).join('');
  document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{tab=+t.dataset.i;SV('tab',tab);render()});
  for(let i=0;i<6;i++)$('p'+i).classList.toggle('on',i==tab);
- $('oD').value=dmtG;$('oT').value=objT||'';$('oS').value=seuilR;$('oM').value=OBJ.Mauvaise;$('oN').value=OBJ['Non-conforme'];$('oL').value=OBJ.Loupé;$('oF').value=dmtF.toFixed(4);
+ $('oD').value=dmtG;$('oS').value=seuilR;$('oM').value=OBJ.Mauvaise;$('oN').value=OBJ['Non-conforme'];$('oL').value=OBJ.Loupé;$('oF').value=dmtF.toFixed(4);
  const D=LAST=build(),T=tot(D.ag),r=rates(T);
  const wav=(f,w)=>{let s=0,n=0;D.ag.forEach(a=>{if(a[f]!=null&&a[w]>0){s+=a[f]*a[w];n+=a[w]}});return n?s/n:null};const filt=true;const mRm=filt?wav('dRm','va'):DM.rm, mRf=filt?wav('dRf','re'):DM.rf;
  $('sites').innerHTML=['Tous',...D.sites].map(s=>`<button class="${s==site?'bon':'bof'}" data-s="${s}">${s}</button>`).join(' ');
@@ -313,7 +314,7 @@ function render(){
  // KPI
 const kq=K('Mauvaise',pc(r.rM),`${T.M} NQ · obj ${pc(OBJ.Mauvaise)}`,'q',bd(r.rM,OBJ.Mauvaise),arw(r.rM,OBJ.Mauvaise))+K('Non-conforme',pc(r.rN),`${T.NC} NQ · obj ${pc(OBJ['Non-conforme'])}`,'q',bd(r.rN,OBJ['Non-conforme']),arw(r.rN,OBJ['Non-conforme']))+K('Loupé',pc(r.rL),`${T.L} NQ · obj ${pc(OBJ.Loupé)}`,'q',bd(r.rL,OBJ.Loupé),arw(r.rL,OBJ.Loupé));
 const kd=K('DMT RM',mRm==null?'–':hms(mRm),'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG),arw(mRm,dmtG))+K('DMT Refus',mRf==null?'–':hms(mRf),'Refusés · cible '+hms(dmtF),'d',bd(mRf,dmtF),arw(mRf,dmtF));
-const pr=prevRange($('d1').value,$('d2').value),PV=pr?countP(pr[0],pr[1]):null;const rr=T.tr?T.re/T.tr:null,sR=seuilR/100;const ev=PV&&PV.va?(T.va/PV.va-1)*100:null;const kp=K('Traités',T.tr,objT?`obj ${objT} · ${Math.round(T.tr/objT*100)} %`:'hors refus IA','',bu(T.tr,objT),au(T.tr,objT))+K('Validés',T.va,ev==null?'Choisir une période pour comparer':`${ev>=0?'+':''}${ev.toFixed(1)} % vs période préc.`,'',ev==null?'':`<span class="kb ${ev>=0?'kok':'kbd'}">${ev>=0?'En hausse':'En baisse'}</span>`,ev==null?'':`<div class="kar ${ev>=0?'up':'dn'}">${ev>=0?'▲':'▼'}</div>`)+K('Refusés',T.re,rr==null?'':`${(rr*100).toFixed(1)} % de refus · seuil ${seuilR} %`,'s',bd(rr,sR),arw(rr,sR));
+const pr=prevRange($('d1').value,$('d2').value),PV=pr?countP(pr[0],pr[1]):null;const rr=T.tr?T.re/T.tr:null,sR=seuilR/100;const evT=PV?ev2(T.tr,PV.tr):null,ev=PV?ev2(T.va,PV.va):null;const kp=K('Traités',T.tr,evS(evT),'',evB(evT),evA(evT))+K('Validés',T.va,evS(ev),'',evB(ev),evA(ev))+K('Refusés',T.re,rr==null?'':`${(rr*100).toFixed(1)} % de refus · seuil ${seuilR} %`,'s',bs(rr,sR),arw(rr,sR));
 $('k0').innerHTML=kp+kd+kq;$('k1').innerHTML=kp+K('Agents',D.ag.length,'');
 $('k2').innerHTML=K('DMT RM moyen',mRm==null?'–':hms(mRm),(site==='Tous'?'':'Site : '+site+' · ')+'Validés · cible '+hms(dmtG),'d',bd(mRm,dmtG),arw(mRm,dmtG))+K('DMT Refus moyen',mRf==null?'–':hms(mRf),(site==='Tous'?'':'Site : '+site+' · ')+'Refusés · cible '+hms(dmtF),'d',bd(mRf,dmtF),arw(mRf,dmtF));
 $('k3').innerHTML=kq;
