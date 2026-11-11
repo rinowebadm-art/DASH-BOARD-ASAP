@@ -1066,10 +1066,7 @@ async function loadShared(){
  $('sm').onchange=()=>setPer($('sm'),$('sw'));
  ['d1','d2'].forEach(id=>$(id).addEventListener('input',()=>{$('sw').value=$('sm').value=''}));
  $('rz').addEventListener('click',()=>{$('sw').value=$('sm').value=''});
-let PARAMETRAGE = [];
-const convertirAvantParametrage = convertir;
-convertir = function(j) {
-  const table = j.Parametrage;
+let PARAMETRAGE = [];let derniereMajDonnees = null;const convertirAvantParametrage = convertir;convertir = function(j) {  const valeur = j.ts;  let dateMaj = null;  if (valeur !== null && valeur !== undefined && valeur !== '') {    const texte = String(valeur).trim();    const date = new Date(      /^\d+$/.test(texte) ? Number(texte) : valeur    );    if (!Number.isNaN(date.getTime())) dateMaj = date;  }  derniereMajDonnees = dateMaj;  const table = j.Parametrage;
   PARAMETRAGE = table && Array.isArray(table.h) && Array.isArray(table.r)
     ? table.r.map(ligne => {
         const objet = {};
@@ -1124,12 +1121,57 @@ render = function() {
   const afficher = valeur => valeur === null
     ? '–'
     : valeur.toLocaleString('fr-FR');
-  const precision = 'Paramétrage · tous sites · filtre dates uniquement';
+  const formatJour = valeur =>
+    new Date(valeur + 'T00:00:00').toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  const libellePeriode = () => {
+    if (!debut && !fin) return 'Toutes les dates';
+    if (!debut) return 'Jusqu’au ' + formatJour(fin);
+    if (!fin) return 'Depuis le ' + formatJour(debut);
+    if (debut > fin) return 'Période invalide';
+    if (debut === fin) {
+      return 'Journée du ' + formatJour(debut);
+    }
+    const dateDebut = new Date(debut + 'T00:00:00');
+    const dateFin = new Date(fin + 'T00:00:00');
+    const selection = debut + '|' + fin;
+    const dernierJourMois = iso(
+      new Date(
+        dateDebut.getFullYear(),
+        dateDebut.getMonth() + 1,
+        0
+      )
+    );
+    const moisComplet =
+      dateDebut.getDate() === 1 &&
+      fin === dernierJourMois;
+    if ($('sm').value === selection || moisComplet) {
+      const mois = dateDebut.toLocaleDateString('fr-FR', {
+        month: 'long',
+        year: 'numeric'
+      });
+      return mois.charAt(0).toUpperCase() + mois.slice(1);
+    }
+    const dimanche = new Date(dateDebut);
+    dimanche.setDate(dimanche.getDate() + 6);
+    const semaineComplete =
+      dateDebut.getDay() === 1 &&
+      iso(dimanche) === fin;
+    if ($('sw').value === selection || semaineComplete) {
+      const [annee, semaine] = isoWeek(dateDebut);
+      return 'Semaine ' + semaine + ' · ' + annee;
+    }
+    return 'Du ' + formatJour(debut) + ' au ' + formatJour(fin);
+  };
+  const precision = libellePeriode() + ' · Tous sites';
   const panneau = document.createElement('div');
   panneau.className = 'card';
   const titre = document.createElement('div');
   titre.className = 'ct';
-  titre.textContent = 'Prévision et flux — Paramétrage';
+  titre.style.flexWrap = 'wrap';  const libelleTitre = document.createElement('span');  libelleTitre.textContent = 'Prévision et flux';  const suiviMaj = document.createElement('span');  suiviMaj.style.cssText =    'font-size:11px;font-weight:500;color:var(--asap-muted);';  suiviMaj.textContent = derniereMajDonnees    ? 'Dernière MAJ : ' +      derniereMajDonnees.toLocaleDateString('fr-FR') +      ' à ' +      derniereMajDonnees.toLocaleTimeString('fr-FR', {        hour: '2-digit',        minute: '2-digit'      })    : 'Dernière MAJ : non renseignée';  titre.append(libelleTitre, suiviMaj);
   const cartes = document.createElement('div');
   cartes.className = 'k';
   cartes.innerHTML =
