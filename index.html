@@ -1178,8 +1178,8 @@ render = function() {
     K('Prévision', afficher(prevision), precision) +
     K('Reçu', afficher(recu), precision) +
     K('Traité', afficher(traite), precision) +
-    K('QP', pc(qp), 'Reçu ÷ Prévision') +
-    K('QT', pc(qt), 'Traité ÷ Reçu');
+    K('QP', pc(qp), 'Réception par rapport aux prévisions') +    
+   K('QT', pc(qt), 'Part du volume reçu traitée');
   panneau.append(titre, cartes);
   document
     .querySelectorAll('#p0 .panneau-parametrage')
