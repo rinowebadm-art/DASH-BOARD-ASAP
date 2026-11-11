@@ -1037,7 +1037,87 @@ async function loadShared(){
  $('sm').onchange=()=>setPer($('sm'),$('sw'));
  ['d1','d2'].forEach(id=>$(id).addEventListener('input',()=>{$('sw').value=$('sm').value=''}));
  $('rz').addEventListener('click',()=>{$('sw').value=$('sm').value=''});
-render();loadShared();
+let PARAMETRAGE = [];
+const convertirAvantParametrage = convertir;
+convertir = function(j) {
+  const table = j.Parametrage;
+  PARAMETRAGE = table && Array.isArray(table.h) && Array.isArray(table.r)
+    ? table.r.map(ligne => {
+        const objet = {};
+        table.h.forEach((entete, index) => {
+          objet[String(entete).trim()] = ligne[index];
+        });
+        return objet;
+      })
+    : [];
+  return convertirAvantParametrage(j);
+};
+const renderAvantParametrage = render;
+render = function() {
+  renderAvantParametrage();
+  if (!PARAMETRAGE.length) return;
+  const nombre = valeur => {
+    if (valeur == null || valeur === '') return null;
+    const resultat = typeof valeur === 'number'
+      ? valeur
+      : Number(
+          String(valeur)
+            .replace(/[\s\u00a0\u202f]/g, '')
+            .replace(',', '.')
+        );
+    return Number.isFinite(resultat) ? resultat : null;
+  };
+  const debut = $('d1').value;
+  const fin = $('d2').value;
+  const lignes = PARAMETRAGE.filter(ligne => {
+    const date = toDF(ligne.Date);
+    if (!date || isNaN(date.getTime())) return false;
+    const jour = iso(date);
+    return (!debut || jour >= debut) && (!fin || jour <= fin);
+  });
+  const somme = colonne => {
+    const valeurs = lignes
+      .map(ligne => nombre(ligne[colonne]))
+      .filter(valeur => valeur !== null);
+    return valeurs.length
+      ? valeurs.reduce((total, valeur) => total + valeur, 0)
+      : null;
+  };
+  const prevision = somme('Prévision');
+  const recu = somme('Reçu');
+  const traite = somme('Traité');
+  const qp = prevision > 0 && recu !== null
+    ? recu / prevision
+    : null;
+  const qt = recu > 0 && traite !== null
+    ? traite / recu
+    : null;
+  const afficher = valeur => valeur === null
+    ? '–'
+    : valeur.toLocaleString('fr-FR');
+  const precision = 'Paramétrage · tous sites · filtre dates uniquement';
+  const panneau = document.createElement('div');
+  panneau.className = 'card';
+  const titre = document.createElement('div');
+  titre.className = 'ct';
+  titre.textContent = 'Prévision et flux — Paramétrage';
+  const cartes = document.createElement('div');
+  cartes.className = 'k';
+  cartes.innerHTML =
+    K('Prévision', afficher(prevision), precision) +
+    K('Reçu', afficher(recu), precision) +
+    K('Traité', afficher(traite), precision) +
+    K('QP', pc(qp), 'Reçu ÷ Prévision') +
+    K('QT', pc(qt), 'Traité ÷ Reçu');
+  panneau.append(titre, cartes);
+  document
+    .querySelectorAll('#p0 .panneau-parametrage')
+    .forEach(element => element.remove());
+  panneau.classList.add('panneau-parametrage');
+  $('p0').prepend(panneau);
+};
+render();
+loadShared();
 let pq=Promise.resolve();
 function pushNow(){pq=pq.then(push0,push0);return pq}
 async function push0(){
