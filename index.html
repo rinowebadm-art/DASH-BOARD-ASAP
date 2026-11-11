@@ -8,6 +8,7 @@ Chart.register({id:'pal',beforeUpdate(c){
 const M={'#2ecc71':'#3fc7ab','#e74c3c':'#ee7770','#d4a017':'#f7cd3d','#2e75b6':'#4a89c4','#c55a11':'#cf7433','#16a34a':'#3fc7ab','#c0392b':'#ee7770','#a06600':'#f7cd3d','#15803d':'#3fc7ab'};
 const f=v=>typeof v==='string'?(M[v.toLowerCase()]||v):Array.isArray(v)?v.map(f):v;c.data.datasets.forEach(d=>{d.backgroundColor=f(d.backgroundColor);d.borderColor=f(d.borderColor)});}});
 Chart.defaults.font.family="'Inter','Segoe UI',sans-serif";
+ Chart.defaults.animation = false;
 Chart.defaults.borderRadius=4;
 Chart.defaults.plugins.legend.position='bottom';
 Chart.defaults.plugins.legend.labels.usePointStyle=true;
@@ -863,10 +864,39 @@ function prevRange(d1,d2){if(!d1||!d2)return null;const a=new Date(d1),b=new Dat
 function countP(a,b){let tr=0,va=0,re=0;P.forEach(r=>{const who=r['Traité par']||'';if(!who||/^ai /i.test(who))return;const ks=fk(r,/site/i);let s=(ks&&r[ks])||'-';if(/adm/i.test(s)){const z=siteOf(who);s=z!=='-'?z:'Non classé'}if(site!=='Tous'&&s!==site)return;const t=toD(r['DH traitement']);if(!t)return;const k=iso(t);if(k<a||k>b)return;const e=r[fk(r,/^etat/i)];tr++;if(e==='Validé')va++;else if(e==='Refusé')re++});return {tr,va,re}}
 let LAST;
 
-function render(){
- applyTheme();
+const ongletsPrets = new Set();let navigationOnglet = false;function render(){ if (!navigationOnglet) {   ongletsPrets.clear(); } ongletsPrets.add(Number(tab)); applyTheme();
  $('tabs').innerHTML=TABS.map((t,i)=>`<div class="tab ${i==tab?'on':''}" data-i="${i}">${t}</div>`).join('');
- document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{tab=+t.dataset.i;SV('tab',tab);render()});
+  document.querySelectorAll('.tab').forEach(element => {
+   element.onclick = () => {
+     const prochain = Number(element.dataset.i);
+     if (prochain === Number(tab)) return;
+     tab = prochain;
+     SV('tab', tab);
+     if (!ongletsPrets.has(tab)) {
+       navigationOnglet = true;
+       try {
+         render();
+       } finally {
+         navigationOnglet = false;
+       }
+       return;
+     }
+     document.querySelectorAll('#tabs .tab').forEach(onglet => {
+       onglet.classList.toggle('on', Number(onglet.dataset.i) === tab);
+     });
+     for (let i = 0; i < 6; i++) {
+       $('p' + i).classList.toggle('on', i === tab);
+     }
+     requestAnimationFrame(() => {
+       const panneau = $('p' + tab);
+       Object.values(CH).forEach(graphique => {
+         if (panneau.contains(graphique.canvas)) {
+           graphique.resize();
+         }
+       });
+     });
+   };
+ });
  for(let i=0;i<6;i++)$('p'+i).classList.toggle('on',i==tab);
  $('oD').value=dmtG;$('oM').value=OBJ.Mauvaise;$('oN').value=OBJ['Non-conforme'];$('oL').value=OBJ.Loupé;$('oF').value=dmtF.toFixed(4);
  const D=LAST=build(),T=tot(D.ag),r=rates(T);
