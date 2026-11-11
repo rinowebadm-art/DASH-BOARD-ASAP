@@ -150,8 +150,186 @@ button{border-radius:20px}
  .card{box-shadow:0 8px 24px rgba(80,90,140,.12)}
  [data-theme=dark] .card{box-shadow:0 8px 24px rgba(0,0,0,.45)}
  .ct{letter-spacing:.3px}
-</style></head><body>
-<div class="hd"><div class="ttl"><div class="logo">▦</div><div><h1>DASHBOARD SOFTWARE <em>PRODUCTION ASAP</em><span class="badge" id="wk">–</span></h1><div class="sub">Production · DMT · Qualité</div></div></div>
+</style>
+<style>
+.hd.asap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 150px;
+  padding: 24px 32px;
+  background: #172f48;
+  color: #ffffff;
+  border: none;
+  border-bottom: 1px solid #294763;
+  box-shadow: none;
+}
+.asap-header .asap-header-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 0;
+  filter: drop-shadow(0 8px 10px rgba(15, 35, 50, .18));
+}
+.asap-header .asap-header-icon {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 110px;
+  width: 110px;
+  height: 104px;
+  background: linear-gradient(135deg, #294b69, #172f48);
+  color: #ffffff;
+  font-size: 38px;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+.asap-header .asap-header-title {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  gap: 6px;
+  margin-left: -24px;
+}
+.asap-header .asap-header-subtitle {
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  margin: 0 52px 0 0;
+  padding: 8px 38px;
+  background: linear-gradient(100deg, #203e59, #315774);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .8px;
+  clip-path: polygon(0 0, calc(100% - 25px) 0, 100% 100%, 0 100%);
+}
+.asap-header .asap-header-title h1 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 6px 10px;
+  min-height: 62px;
+  margin: 0;
+  padding: 14px 42px;
+  background: linear-gradient(100deg, #ffffff, #e9f0f5);
+  color: #172f48;
+  font-size: clamp(17px, 1.7vw, 28px);
+  font-weight: 900;
+  letter-spacing: .4px;
+  line-height: 1.3;
+  clip-path: polygon(0 0, calc(100% - 36px) 0, 100% 100%, 0 100%);
+}
+.asap-header .asap-header-title h1 em {
+  color: #b84716;
+  font-style: normal;
+  font-weight: 900;
+}
+.asap-header .asap-header-title .badge {
+  margin-left: 4px;
+  padding: 4px 10px;
+  background: #b84716;
+  color: #ffffff;
+  border: 1px solid #b84716;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.asap-header .asap-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 10px;
+  text-align: right;
+}
+.asap-header .asap-header-right .tm {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 7px 14px;
+  background: #ffffff;
+  color: #172f48;
+  border: 1px solid #ffffff;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.asap-header .asap-header-right .tm:hover {
+  background: #e9f0f5;
+  border-color: #e9f0f5;
+}
+.asap-header #per {
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+@media (max-width: 1000px) {
+  .hd.asap-header {
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 18px 20px;
+  }
+  .asap-header .asap-header-left {
+    flex-basis: 100%;
+  }
+  .asap-header .asap-header-right {
+    flex: 1 0 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+@media (max-width: 650px) {
+  .hd.asap-header {
+    padding: 14px 12px;
+  }
+  .asap-header .asap-header-icon {
+    flex-basis: 76px;
+    width: 76px;
+    font-size: 28px;
+  }
+  .asap-header .asap-header-title {
+    margin-left: -18px;
+  }
+  .asap-header .asap-header-subtitle {
+    margin-right: 14px;
+    padding: 8px 24px;
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .asap-header .asap-header-title h1 {
+    padding: 12px 26px;
+    font-size: 16px;
+    letter-spacing: 0;
+  }
+  .asap-header .asap-header-title .badge {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+}
+@media print {
+  .hd.asap-header {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .asap-header .asap-header-right .tm {
+    display: none;
+  }
+}
+</style>
+</head>
+ <body>
+<header class="hd asap-header">  <div class="asap-header-left">    <div class="asap-header-icon" aria-hidden="true">▦</div>    <div class="asap-header-title">      <div class="asap-header-subtitle">Production · DMT · Qualité</div>      <h1>        <span>DASHBOARD SOFTWARE</span>        <em>PRODUCTION ASAP</em>        <span class="badge" id="wk">–</span>      </h1>    </div>  </div>  <div class="asap-header-right">    <button type="button" class="tm" id="tm">Mode sombre</button>    <span id="per"></span>  </div></header>
 <div style="text-align:right;font-size:11px"><button class="tm" id="tm">🌙 Mode sombre</button><span id="per"></span></div></div>
 <div class="imp">
 <label class="dz"><b>Prod M ASAP</b> (xlsx)<input type="file" id="fp" accept=".xlsx,.xls"></label>
@@ -306,7 +484,39 @@ function render(){
  $('sites').innerHTML=['Tous',...D.sites].map(s=>`<button class="${s==site?'bon':'bof'}" data-s="${s}">${s}</button>`).join(' ');
  document.querySelectorAll('#sites button').forEach(b=>b.onclick=()=>{site=b.dataset.s;render()});
  const dk=Object.keys(D.days).filter(d=>d!='?').sort();
- if(dk.length){$('per').textContent=new Date(dk[0]).toLocaleDateString('fr-FR')+' → '+new Date(dk[dk.length-1]).toLocaleDateString('fr-FR')}
+  const debutBandeau = $('d1').value || dk[0] || '';
+ const finBandeau = $('d2').value || dk[dk.length - 1] || '';
+ const formatDateBandeau = valeur =>
+   new Date(valeur + 'T00:00:00').toLocaleDateString('fr-FR', {
+     day: '2-digit',
+     month: '2-digit',
+     year: 'numeric'
+   });
+ if (debutBandeau && finBandeau) {
+   $('per').textContent =
+     formatDateBandeau(debutBandeau) +
+     ' → ' +
+     formatDateBandeau(finBandeau);
+   const debut = new Date(debutBandeau + 'T00:00:00');
+   const fin = new Date(finBandeau + 'T00:00:00');
+   const [anneeDebut, semaineDebut] = isoWeek(debut);
+   const [anneeFin, semaineFin] = isoWeek(fin);
+   if (debutBandeau === finBandeau) {
+     $('wk').textContent = 'JOUR';
+   } else if (
+     anneeDebut === anneeFin &&
+     semaineDebut === semaineFin
+   ) {
+     $('wk').textContent = 'S' + semaineDebut;
+   } else if ($('sm').value) {
+     $('wk').textContent = 'MOIS';
+   } else {
+     $('wk').textContent = 'PÉRIODE';
+   }
+ } else {
+   $('per').textContent = 'Aucune période disponible';
+   $('wk').textContent = '–';
+ }
  const ab=$('ab');ab.classList.toggle('on',D.un.length>0);
  ab.innerHTML='<b>Noms NQ non rapprochés :</b> '+D.un.map(u=>`${u} → <select data-u="${u.replace(/"/g,'&quot;')}"><option value="">—</option>${D.keys.map(k=>`<option>${k}</option>`).join('')}</select>`).join('');
  ab.querySelectorAll('select').forEach(s=>s.onchange=()=>{if(s.value){map[s.dataset.u]=s.value;SV('map',map);render()}});
