@@ -922,7 +922,7 @@ P.forEach(r => {
  });
  Object.values(A).forEach(a=>{const d=DMW.length?dmaFor(key2(a.n),d1,d2):DMA[key2(a.n)];if(!d)return;a.dRm=d.rm;a.dRf=d.rf;const w=(d.rm!=null?a.va:0)+(d.rf!=null?a.re:0);if(!w)return;a.dS=((d.rm!=null?d.rm*a.va:0)+(d.rf!=null?d.rf*a.re:0))/w;a.dN=1;const sg=gs(a.site);sg.dS+=a.dS;sg.dN++;if(d.rm!=null){sg.vS+=d.rm;sg.vN++}if(d.rf!=null){sg.rS+=d.rf;sg.rN++}bins[a.dS<5?0:a.dS<=15?1:2]++});
  Object.values(days).forEach(d=>{Object.entries(d.ag||{}).forEach(([n,c])=>{const a=A[n];if(a&&a.dN){d.dS+=a.dS*c;d.dN+=c}})});
- // NQ : site de la source, date d'indexation et rapprochement sans fuzzy.
+  // NQ : site de la source, date de diffusion et rapprochement sans fuzzy.
  const un = [], cs = {}, causes = {}, nq = [];
  const enteteNQ = valeur =>
    norm(valeur).replace(/[^a-z0-9]/g, '');
@@ -935,7 +935,7 @@ P.forEach(r => {
  const ki = colonneNQ(/^imputable/);
  const kcr = colonneNQ(/^cause/);
  const kqualif = colonneNQ(/^qualif/);
- const kdt = colonneNQ(/^datedindexation$|^dateindexation$/);
+ const kdt = colonneNQ(/^datedediffusion$|^datediffusion$/);
  const ksiteNQ = colonneNQ(/^site/);
  // Accepte les noms/prénoms inversés, sans distance approximative.
  const identiteNQ = valeur =>
@@ -991,7 +991,7 @@ P.forEach(r => {
      collaborateur: kc,
      categorie: kg,
      imputable: ki,
-     dateIndexation: kdt,
+     dateDiffusion: kdt,
      site: ksiteNQ,
      entetes: Object.keys(R[0] || {})
    });
