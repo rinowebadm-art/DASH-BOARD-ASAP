@@ -1313,10 +1313,63 @@ if(o&&w&&(x>0||y>0))DMW.push({k:key2(o),w,rm:x,rf:y,vrm:+r[kv]||0,vex:+r[ke]||0}
   ob={Mauvaise:q(/mauvaise/i)??OBJ.Mauvaise,'Non-conforme':q(/non/i)??OBJ['Non-conforme'],Loupé:q(/^lou/i)??OBJ.Loupé}}
  return {P,R:O(j.NQ),DM:{rm:av(a),rf:av(b)},DMA,LST:L2,OBJ:ob,ts:j.ts||Date.now()};
 }
-async function loadShared(){
- try{const r=await fetch(`https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}?`+Date.now());
- if(!r.ok)return;apply(convertir(await r.json()))}catch(e){console.warn('Erreur data.json',e)}
+let chargementSharedEnCours = false;
+let derniereVersionShared = null;
+async function loadShared() {
+  if (chargementSharedEnCours) return;
+  chargementSharedEnCours = true;
+  try {
+    const url =
+      `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/main/${GH_PATH}` +
+      '?t=' + Date.now();
+    const reponse = await fetch(url, {
+      cache: 'no-store'
+    });
+    if (!reponse.ok) {
+      throw new Error('Chargement impossible : HTTP ' + reponse.status);
+    }
+    const donnees = await reponse.json();
+    const version = donnees.ts == null ? null : String(donnees.ts);
+    if (version !== null && version === derniereVersionShared) {
+      return;
+    }
+    const semaineSelectionnee = $('sw').value;
+    const moisSelectionne = $('sm').value;
+    apply(convertir(donnees));
+    if (
+      Array.from($('sw').options).some(
+        option => option.value === semaineSelectionnee
+      )
+    ) {
+      $('sw').value = semaineSelectionnee;
+    }
+    if (
+      Array.from($('sm').options).some(
+        option => option.value === moisSelectionne
+      )
+    ) {
+      $('sm').value = moisSelectionne;
+    }
+    derniereVersionShared = version;
+  } catch (erreur) {
+    console.error('Erreur de mise à jour ASAP', erreur);
+    $('st').className = 'sp';
+    $('st').textContent =
+      'Échec de mise à jour — données affichées conservées : ' +
+      erreur.message;
+  } finally {
+    chargementSharedEnCours = false;
+  }
 }
+setInterval(() => {
+  if (!document.hidden) loadShared();
+}, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) loadShared();
+});
+window.addEventListener('focus', () => {
+  loadShared();
+});
  function isoWeek(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=t.getUTCFullYear();return [y,Math.ceil(((t-Date.UTC(y,0,1))/864e5+1)/7)]}
  function monday(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
  function fillPeriods(){ 
