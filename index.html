@@ -1428,7 +1428,7 @@ render = function() {
   };
   const prevision = somme('Prévision');
   const recu = somme('Reçu');
-  const traite = somme('Traité');
+  const traite = LAST ? tot(LAST.ag).tr : null;
   const qp = prevision > 0 && recu !== null
     ? recu / prevision
     : null;
@@ -1494,7 +1494,7 @@ render = function() {
   cartes.innerHTML =
     K('Prévision', afficher(prevision), precision) +
     K('Reçu', afficher(recu), precision) +
-    K('Traité', afficher(traite), precision) +
+    K(  'Traité',  afficher(traite),  libellePeriode() + ' · ' + site +    ($('sr').value.trim() ? ' · Recherche agent' : '')) +
     K('QP', pc(qp), 'Réception par rapport aux prévisions') +    
    K('QT', pc(qt), 'Part du volume reçu traitée');
   panneau.append(titre, cartes);
