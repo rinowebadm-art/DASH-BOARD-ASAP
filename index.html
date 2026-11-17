@@ -767,7 +767,7 @@ td input {
 <div class="pg" id="p4"><div class="card"><div class="ct">Détail par agent</div><div class="tw"><table><thead><tr id="th"></tr></thead><tbody id="tb"></tbody></table></div></div></div>
 
 <div class="pg" id="p5"><div class="card"><div class="ct">Classement des agents
- <select class="dp" id="rk"><option value="glob">Rang global (moyenne des 5 critères)</option><option value="tr">Production (traités)</option><option value="dmt">DMT (le plus bas)</option><option value="rM">Taux Mauvaise (le plus bas)</option><option value="rN">Taux Non-conforme (le plus bas)</option><option value="rL">Taux Loupé (le plus bas)</option></select></div>
+ <select class="dp" id="rk"><option value="glob">Score global /100 — Prod 45 % · Qualité 30 % · DMT 25 %</option><option value="tr">Production (traités)</option><option value="dmt">DMT (le plus bas)</option><option value="rM">Taux Mauvaise (le plus bas)</option><option value="rN">Taux Non-conforme (le plus bas)</option><option value="rL">Taux Loupé (le plus bas)</option></select></div>
  <div class="g2"><div class="tw"><table><thead><tr><th>#</th><th>Agent</th><th>Site</th><th>Valeur</th></tr></thead><tbody id="rb"></tbody></table></div>
  <div><canvas id="e1" height="260"></canvas></div></div></div></div>
 </div>
@@ -1207,16 +1207,218 @@ $('k3').innerHTML=kq;
  document.querySelectorAll('td input').forEach(i=>i.onchange=()=>{dmtA[i.dataset.a]=+i.value;SV('dmtA',dmtA);render()});
  $('nh').innerHTML='<tr><th>Date</th><th>Agent</th><th>Site</th><th>Catégorie</th><th>Cause</th></tr>';
  $('nb').innerHTML=D.nq.map(n=>`<tr><td>${n.Date}</td><td>${n.Agent}</td><td>${n.Site}</td><td>${n.Catégorie}</td><td>${n.Cause}</td></tr>`).join('');
- // classement
- {const k=$('rk').value,base=rows.filter(a=>a.tr>0);
-  if(k=='glob'){base.forEach(a=>a._g=0);
-   ['tr','dmt','rM','rN','rL'].forEach(c=>{const L=base.filter(a=>a[c]!=null).sort((x,y)=>c=='tr'?y.tr-x.tr:x[c]-y[c]);
-    L.forEach((a,i)=>a._g+=i+1);base.forEach(a=>{if(a[c]==null)a._g+=L.length+1})})}
-  const L=base.filter(a=>k=='glob'||a[k]!=null).sort((x,y)=>k=='glob'?x._g-y._g:k=='tr'?y.tr-x.tr:x[k]-y[k]);
-  const val=a=>k=='glob'?a._g/5:k=='tr'?a.tr:k=='dmt'?a.dmt:a[k]*100;
-  const fmt=a=>k=='glob'?'rang moy. '+(a._g/5).toFixed(1):k=='tr'?a.tr:k=='dmt'?hms(a.dmt):pc(a[k]);
-  $('rb').innerHTML=L.map((a,i)=>`<tr><td>${['🥇','🥈','🥉'][i]||i+1}</td><td>${a.n}</td><td>${a.site}</td><td>${fmt(a)}</td></tr>`).join('');
-  if(tab==5){const t=L.slice(0,15);mk('e1',{type:'bar',data:{labels:t.map(a=>a.n),datasets:[{label:'Valeur',data:t.map(val),backgroundColor:t.map((a,i)=>i<3?'#d4a017':'#2e75b6')}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}})}}
+// classement : Prod 45 %, Qualité 30 %, DMT 25 %
+ {
+   const k = $('rk').value;
+   const base = rows.filter(a => a.tr > 0);
+   const borner = valeur => Math.max(0, Math.min(1, valeur));
+   const valide = valeur =>
+     typeof valeur === 'number' && Number.isFinite(valeur);
+   const echapper = valeur => String(valeur ?? '')
+     .replace(/&/g, '&amp;')
+     .replace(/</g, '&lt;')
+     .replace(/>/g, '&gt;')
+     .replace(/"/g, '&quot;');
+   // Référence indépendante de la recherche d'un agent.
+   const volumes = new Map();
+   Object.values(D.days).forEach(jour => {
+     Object.entries(jour.ag || {}).forEach(([nom, volume]) => {
+       volumes.set(nom, (volumes.get(nom) || 0) + volume);
+     });
+   });
+   let referenceProd = 0;
+   volumes.forEach(volume => {
+     referenceProd = Math.max(referenceProd, volume);
+   });
+   // Une source NQ absente n'est pas une qualité parfaite.
+   const entetesQualite = Object.keys(R[0] || {}).map(entete =>
+     norm(entete).replace(/[^a-z0-9]/g, '')
+   );
+   const qualiteDisponible = [
+     /^collaborateur/,
+     /^categorie/,
+     /^imputable/,
+     /^datedediffusion$|^datediffusion$/,
+     /^site/
+   ].every(expression =>
+     entetesQualite.some(entete => expression.test(entete))
+   );
+   const noteQualite = (taux, objectif) => {
+     if (
+       !valide(taux) || taux < 0 ||
+       !valide(objectif) || objectif < 0
+     ) return null;
+     if (objectif === 0) return taux === 0 ? 1 : 0;
+     return borner(1 - (taux - objectif) / (2 * objectif));
+   };
+   const noteDmt = (duree, cible) => {
+     if (
+       !valide(duree) || duree <= 0 ||
+       !valide(cible) || cible <= 0
+     ) return null;
+     return borner(cible / duree);
+   };
+   base.forEach(a => {
+     a.scoreProd = referenceProd > 0
+       ? borner(a.tr / referenceProd)
+       : null;
+     const notesQualite = qualiteDisponible
+       ? [
+           noteQualite(a.rM, OBJ.Mauvaise),
+           noteQualite(a.rN, OBJ['Non-conforme']),
+           noteQualite(a.rL, OBJ.Loupé)
+         ].filter(note => note !== null)
+       : [];
+     a.scoreQualite = notesQualite.length
+       ? notesQualite.reduce((somme, note) => somme + note, 0)
+           / notesQualite.length
+       : null;
+     let sommeDmt = 0;
+     let volumeDmt = 0;
+     let dmtIncomplete = false;
+     [
+       [a.va, a.dRm, a.obj],
+       [a.re, a.dRf, a.objF]
+     ].forEach(([volume, duree, cible]) => {
+       if (!(volume > 0)) return;
+       const note = noteDmt(duree, cible);
+       if (note === null) {
+         dmtIncomplete = true;
+         return;
+       }
+       sommeDmt += note * volume;
+       volumeDmt += volume;
+     });
+     a.scoreDmt = !dmtIncomplete && volumeDmt > 0
+       ? sommeDmt / volumeDmt
+       : null;
+     a.scoreGlobal = [
+       a.scoreProd,
+       a.scoreQualite,
+       a.scoreDmt
+     ].every(note => note !== null)
+       ? 100 * (
+           0.45 * a.scoreProd +
+           0.30 * a.scoreQualite +
+           0.25 * a.scoreDmt
+         )
+       : null;
+   });
+   const L = base
+     .filter(a => k === 'glob' || a[k] != null)
+     .sort((x, y) => {
+       if (k === 'glob') {
+         if (x.scoreGlobal === null && y.scoreGlobal !== null) {
+           return 1;
+         }
+         if (y.scoreGlobal === null && x.scoreGlobal !== null) {
+           return -1;
+         }
+         return (y.scoreGlobal ?? -1) - (x.scoreGlobal ?? -1) ||
+           y.tr - x.tr ||
+           x.n.localeCompare(y.n);
+       }
+       return (k === 'tr' ? y.tr - x.tr : x[k] - y[k]) ||
+         x.n.localeCompare(y.n);
+     });
+   const val = a => k === 'glob'
+     ? a.scoreGlobal
+     : k === 'tr'
+       ? a.tr
+       : k === 'dmt'
+         ? a.dmt
+         : a[k] * 100;
+   const fmt = a => k === 'glob'
+     ? a.scoreGlobal === null
+       ? 'Non calculable'
+       : a.scoreGlobal.toFixed(1) + ' /100'
+     : k === 'tr'
+       ? a.tr.toLocaleString('fr-FR')
+       : k === 'dmt'
+         ? hms(a.dmt)
+         : pc(a[k]);
+   const detail = a => {
+     if (k !== 'glob') return '';
+     const points = (note, poids) => note === null
+       ? 'indisponible'
+       : (note * poids).toFixed(1) + '/' + poids;
+     return 'Production : ' + points(a.scoreProd, 45) +
+       ' · Qualité : ' + points(a.scoreQualite, 30) +
+       ' · DMT : ' + points(a.scoreDmt, 25);
+   };
+   $('rb').innerHTML = L.map((a, i) => {
+     const calculable = k !== 'glob' || a.scoreGlobal !== null;
+     const rang = calculable
+       ? ['🥇', '🥈', '🥉'][i] || i + 1
+       : '–';
+     return `<tr>
+       <td>${rang}</td>
+       <td>${echapper(a.n)}</td>
+       <td>${echapper(a.site)}</td>
+       <td title="${echapper(detail(a))}">${fmt(a)}</td>
+     </tr>`;
+   }).join('') ||
+     '<tr><td colspan="4">Aucun agent dans la sélection</td></tr>';
+   let note = $('noteScoreASAP');
+   if (!note) {
+     note = document.createElement('p');
+     note.id = 'noteScoreASAP';
+     note.style.cssText =
+       'margin:0 0 16px;color:var(--asap-muted);' +
+       'font-size:12px;line-height:1.6;';
+     $('rk').closest('.ct').after(note);
+   }
+   note.hidden = k !== 'glob';
+   note.textContent =
+     'Score /100 : Production 45 % · Qualité 30 % · DMT 25 %. ' +
+     'Référence production : ' +
+     referenceProd.toLocaleString('fr-FR') +
+     ' traités, pour le site et la période sélectionnés. ' +
+     'Survoler le score pour voir les points par composante.' +
+     (!qualiteDisponible
+       ? ' Source NQ absente ou colonnes requises manquantes.'
+       : '') +
+     (D.un.length
+       ? ' Attention : des NQ ne sont pas rapprochées ; ' +
+         'les scores qualité peuvent être surestimés.'
+       : '');
+   if (tab == 5) {
+     const t = L.filter(a =>
+       k !== 'glob' || a.scoreGlobal !== null
+     ).slice(0, 15);
+     const label = k === 'glob' ? 'Score /100' : 'Valeur';
+     mk('e1', {
+       type: 'bar',
+       data: {
+         labels: t.map(a => a.n),
+         datasets: [{
+           label,
+           data: t.map(val),
+           backgroundColor: t.map((a, i) =>
+             i < 3 ? '#d4a017' : '#2e75b6'
+           )
+         }]
+       },
+       options: {
+         indexAxis: 'y',
+         scales: {
+           x: k === 'glob'
+             ? {min: 0, max: 100}
+             : {beginAtZero: true}
+         },
+         plugins: {
+           legend: {display: false},
+           tooltip: {
+             callbacks: {
+               label: contexte => fmt(t[contexte.dataIndex]),
+               afterLabel: contexte => detail(t[contexte.dataIndex])
+             }
+           }
+         }
+       }
+     });
+   }
+ }
  // graphiques
  const sn=D.S.map(s=>s.n);
  if(tab==0)mk('a1',{type:'bar',data:{labels:dk,datasets:[{label:'Validés',data:dk.map(d=>D.days[d].va),backgroundColor:'#2ecc71'},{label:'Refusés',data:dk.map(d=>D.days[d].re),backgroundColor:'#e74c3c'}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}});
