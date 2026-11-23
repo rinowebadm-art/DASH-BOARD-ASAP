@@ -1603,7 +1603,7 @@ render = function() {
   };
   const prevision = somme('Prévision');
   const recu = somme('Reçu');
-  const traite = somme('Traité');
+  const traite = somme('Traité');  // En vue globale, utiliser le même total ADM que « Prévision et flux ».  if (site === 'Tous' && !$('sr').value.trim() && traite !== null) {    const carteTraites = $('k0').firstElementChild;    if (carteTraites) {      carteTraites.outerHTML = K(        'Traités',        traite.toLocaleString('fr-FR'),        'ADM · Total de référence'      );    }  }
   const qp = prevision > 0 && recu !== null
     ? recu / prevision
     : null;
