@@ -1672,7 +1672,53 @@ render = function() {
     K('Traité', afficher(traite), libellePeriode() + ' · ADM (Tana + Diégo)') +
     K('QP', pc(qp), 'Réception par rapport aux prévisions') +    
    K('QT', pc(qt), 'Part du volume reçu traitée');
-  panneau.append(titre, cartes);
+  const referenceADM = new Map();
+  for (const ligne of lignes) {
+    const n = nombre(ligne['Traité']);
+    if (n === null) continue;
+    const jour = iso(toDF(ligne.Date));
+    referenceADM.set(jour, (referenceADM.get(jour) || 0) + n);
+  }
+  const detailADM = new Map();
+  const volumesADM = {Tana: 0, 'Diégo': 0, 'Non rattaché': 0};
+  for (const ligne of P) {
+    if (String(ligne.Site ?? '').toLowerCase() !== 'adm value') continue;
+    const date = toD(ligne['DH traitement']);
+    if (!date || !Number.isFinite(date.getTime())) continue;
+    const jour = iso(date);
+    if ((debut && jour < debut) || (fin && jour > fin)) continue;
+    const n = poidsProduction(ligne);
+    if (!n) continue;
+    const agence = affectationProduction(ligne)?.s;
+    const libelle = agence === 'Tana' || agence === 'Diégo'
+      ? agence
+      : 'Non rattaché';
+    volumesADM[libelle] += n;
+    detailADM.set(jour, (detailADM.get(jour) || 0) + n);
+  }
+  const joursADM = new Set([...referenceADM.keys(), ...detailADM.keys()]);
+  const joursEnEcart = [...joursADM].filter(jour =>
+    !referenceADM.has(jour) ||
+    (detailADM.get(jour) ?? 0) !== referenceADM.get(jour)
+  );
+  const totalDetail = Object.values(volumesADM).reduce((a, b) => a + b, 0);
+  const noteADM = document.createElement('p');
+  noteADM.style.cssText = 'font-size:12px;line-height:1.5;color:var(--asap-muted)';
+  if (traite === null) {
+    noteADM.textContent = 'Ventilation ADM indisponible : aucun total de référence.';
+  } else if (joursEnEcart.length) {
+    const ecart = totalDetail - traite;
+    noteADM.textContent =
+      'Ventilation ADM non validée : ' + joursEnEcart.length +
+      ' jour(s) non concordant(s). Écart net Extract − Traité ADM : ' +
+      (ecart > 0 ? '+' : '') + afficher(ecart) + '.';
+  } else {
+    noteADM.textContent =
+      'Ventilation ADM · Tana : ' + afficher(volumesADM.Tana) +
+      ' · Diégo : ' + afficher(volumesADM['Diégo']) +
+      ' · Non rattaché : ' + afficher(volumesADM['Non rattaché']);
+  }
+  panneau.append(titre, cartes, noteADM);
   document
     .querySelectorAll('#p0 .panneau-parametrage')
     .forEach(element => element.remove());
