@@ -858,7 +858,7 @@ function applyTheme(){document.documentElement.dataset.theme=theme;$('tm').textC
  Chart.defaults.color=theme=='dark'?'#cbd5e1':'#6b7280';Chart.defaults.borderColor=theme=='dark'?'#2d3f55':'#eef1f4'}
 $('tm').onclick=()=>{theme=theme=='dark'?'light':'dark';SV('theme',theme);render()};
 ['oD','oF','oM','oN','oL'].forEach(id=>$(id).onchange=()=>{dmtG=+$('oD').value||dmtG;dmtF=+$('oF').value||dmtF;OBJ.Mauvaise=+$('oM').value;OBJ['Non-conforme']=+$('oN').value;OBJ.Loupé=+$('oL').value;SV('dmtG',dmtG);SV('dmtF',dmtF);SV('obj',OBJ);render()});
-['d1','d2','sr'].forEach(id=>$(id).oninput=render);
+['d1','d2','sr'].forEach(id=>$(id).oninput=()=>render());
 $('rk').onchange=render;
 $('rz').onclick=()=>{$('d1').value=$('d2').value=$('sr').value='';site='Tous';render()};
 const MFR=['janvier','fevrier','mars','avril','mai','juin','juillet','aout','septembre','octobre','novembre','decembre'];
@@ -1630,7 +1630,7 @@ render = function() {
   };
   const prevision = somme('Prévision');
   const recu = somme('Reçu');
-  const traite = LAST ? tot(LAST.ag).tr : null;
+  const traite = somme('Traité');
   const qp = prevision > 0 && recu !== null
     ? recu / prevision
     : null;
@@ -1696,7 +1696,7 @@ render = function() {
   cartes.innerHTML =
     K('Prévision', afficher(prevision), precision) +
     K('Reçu', afficher(recu), precision) +
-    K(  'Traité',  afficher(traite),  libellePeriode() + ' · ' + site +    ($('sr').value.trim() ? ' · Recherche agent' : '')) +
+    K('Traité', afficher(traite), libellePeriode() + ' · ADM (Tana + Diégo)') +
     K('QP', pc(qp), 'Réception par rapport aux prévisions') +    
    K('QT', pc(qt), 'Part du volume reçu traitée');
   panneau.append(titre, cartes);
