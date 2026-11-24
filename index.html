@@ -1666,40 +1666,33 @@ render = function() {
   titre.style.flexWrap = 'wrap';  const libelleTitre = document.createElement('span');  libelleTitre.textContent = 'Prévision et flux';  const suiviMaj = document.createElement('span');  suiviMaj.style.cssText =    'font-size:11px;font-weight:500;color:var(--asap-muted);';  suiviMaj.textContent = derniereMajDonnees    ? 'Dernière MAJ : ' +      derniereMajDonnees.toLocaleDateString('fr-FR') +      ' à ' +      derniereMajDonnees.toLocaleTimeString('fr-FR', {        hour: '2-digit',        minute: '2-digit'      })    : 'Dernière MAJ : non renseignée';  titre.append(libelleTitre, suiviMaj);
   const cartes = document.createElement('div');
   cartes.className = 'k';
-  const volumesRM = lignes.map(ligne => nombre(ligne.RM));
-  const rmComplet = volumesRM.length > 0 &&
-    volumesRM.every(volume => Number.isInteger(volume) && volume >= 0);
-  const volumeRM = rmComplet
-    ? volumesRM.reduce((total, volume) => total + volume, 0)
-    : null;
-  const traiteComplet = lignes.every(ligne => {
-    const volume = nombre(ligne['Traité']);
-    return Number.isInteger(volume) && volume >= 0;
-  });
-  const tauxTransfo = rmComplet && traiteComplet &&
-    traite > 0 && volumeRM <= traite
-    ? volumeRM / traite
-    : null;
-  const perimetreADM = libellePeriode() + ' · ADM global';
-  const tauxAffiche = tauxTransfo === null
-    ? '–'
-    : tauxTransfo.toLocaleString('fr-FR', {
-        style: 'percent',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
   cartes.innerHTML =
     K('Prévision', afficher(prevision), precision) +
     K('Reçu', afficher(recu), precision) +
-    K('Traité', afficher(traite), perimetreADM) +
+    K('Traité', afficher(traite), libellePeriode() + ' · ADM (Tana + Diégo)') +
     K('QP', pc(qp), 'Réception par rapport aux prévisions') +
-    K('QT', pc(qt), 'Part du volume reçu traitée') +
-    K('Volume RM', afficher(volumeRM),
-      perimetreADM + (rmComplet ? '' : ' · Données RM manquantes ou invalides')) +
-    K('Taux de transformation', tauxAffiche,
-      tauxTransfo === null
-        ? 'Non calculable : vérifier RM et Traité dans Paramétrage'
-        : perimetreADM + ' · Total RM ÷ total traité');
+    K('QT', pc(qt), 'Part du volume reçu traitée');
+  if (site === 'Tous' && !$('sr').value.trim()) {
+    const volumesRM = lignes.map(ligne => {
+      const valeur = ligne.RM;
+      return valeur == null || String(valeur).trim() === ''
+        ? null
+        : nombre(valeur);
+    });
+    const volumeRM = volumesRM.length > 0 &&
+      volumesRM.every(volume => Number.isInteger(volume) && volume >= 0)
+      ? volumesRM.reduce((total, volume) => total + volume, 0)
+      : null;
+    for (const id of ['k0', 'k1']) {
+      const carteValides = $(id).children[1];
+      if (!carteValides) continue;
+      carteValides.outerHTML = K(
+        'Validés',
+        afficher(volumeRM),
+        volumeRM === null ? 'Données RM manquantes ou invalides' : 'ADM · Total de référence'
+      );
+    }
+  }
   const referenceADM = new Map();
   for (const ligne of lignes) {
     const n = nombre(ligne['Traité']);
